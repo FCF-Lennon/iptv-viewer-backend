@@ -283,16 +283,14 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ```text
 Estado: 🟢 En desarrollo
-Última fase: Día 1 – Setup del proyecto (COMPLETADO)
+Última fase: Día 2 – Configuración y entorno (COMPLETADO)
 Avances:
-- Repositorio y ramas configuradas (main / develop)
-- README y .gitignore iniciales
-- Entorno virtual creado
-- Dependencias base instaladas
-- FastAPI levantado correctamente
-- Endpoint /health operativo
-- Swagger (/docs) funcionando
-Próximo paso: Día 2 – Configuración y entorno
+- Configuración centralizada con pydantic-settings
+- Variables de entorno (.env / .env.example)
+- Settings tipados y validados
+- Manejo estricto de variables extra
+- Backend levantando correctamente con configuración externa
+Próximo paso: Día 3 – Cliente Xtream Codes
 ```
 
 ```

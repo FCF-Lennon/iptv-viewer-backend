@@ -1,6 +1,7 @@
 # IPTV Viewer – Backend
 
 ## 📌 Descripción
+
 Backend del proyecto **IPTV Viewer**, desarrollado para consumir la API de **Xtream Codes** de forma segura y exponer endpoints propios para un frontend web.
 
 Este proyecto se construye **siguiendo un flujo profesional**, con control de versiones en GitHub, ramas, pull requests y trabajo secuenciado por días, simulando un entorno real de equipo.
@@ -8,24 +9,25 @@ Este proyecto se construye **siguiendo un flujo profesional**, con control de ve
 ---
 
 ## 🎯 Objetivo del Backend
-- Encapsular la API de Xtream Codes
-- Evitar exponer credenciales en el frontend
-- Proveer endpoints limpios y seguros
-- Gestionar usuarios, favoritos e historial
-- Servir como base para el frontend web
+
+* Encapsular la API de Xtream Codes
+* Evitar exponer credenciales en el frontend
+* Proveer endpoints limpios y seguros
+* Gestionar usuarios, favoritos e historial
+* Servir como base para el frontend web
 
 ---
 
 ## 🧱 Stack Tecnológico
 
-- **Python 3.12+**
-- **FastAPI** – Framework backend
-- **Pydantic / pydantic-settings** – Validación y configuración
-- **SQLAlchemy** – ORM
-- **SQLite** (inicio) → **PostgreSQL** (futuro)
-- **httpx** – Cliente HTTP async
-- **JWT** – Autenticación
-- **pytest** – Testing
+* **Python 3.12+**
+* **FastAPI** – Framework backend
+* **Pydantic / pydantic-settings** – Validación y configuración
+* **SQLAlchemy** – ORM
+* **SQLite** (inicio) → **PostgreSQL** (futuro)
+* **httpx** – Cliente HTTP async
+* **JWT** – Autenticación
+* **pytest** – Testing
 
 ---
 
@@ -70,12 +72,14 @@ test/*      → pruebas y fixes (temporales)
 ```
 
 ### Reglas
-- ❌ No commits directos a `main`
-- ❌ No desarrollo directo en `develop`
-- ✅ Todo entra vía Pull Request
-- ✅ Commits semánticos
+
+* ❌ No commits directos a `main`
+* ❌ No desarrollo directo en `develop`
+* ✅ Todo entra vía Pull Request
+* ✅ Commits semánticos
 
 Ejemplo:
+
 ```text
 feat: agregar endpoint de películas
 fix: manejar timeout en xtream
@@ -89,23 +93,25 @@ chore: preparar entorno de desarrollo
 Este proyecto utiliza **Conventional Commits en español**.
 
 ### 📌 Formato
+
 ```text
 <tipo>(opcional-alcance): descripción breve en infinitivo
 ```
 
 ### 🏷️ Tipos permitidos
 
-- **feat**: nueva funcionalidad
-- **fix**: corrección de errores
-- **docs**: documentación
-- **chore**: tareas de mantenimiento
-- **refactor**: cambios internos sin alterar comportamiento
-- **test**: pruebas
-- **perf**: mejoras de rendimiento
-- **build**: dependencias o build
-- **ci**: integración continua
+* **feat**: nueva funcionalidad
+* **fix**: corrección de errores
+* **docs**: documentación
+* **chore**: tareas de mantenimiento
+* **refactor**: cambios internos sin alterar comportamiento
+* **test**: pruebas
+* **perf**: mejoras de rendimiento
+* **build**: dependencias o build
+* **ci**: integración continua
 
 ### 📍 Ejemplos reales
+
 ```text
 feat: agregar health check
 feat(xtream): implementar cliente base
@@ -115,10 +121,11 @@ chore: inicializar estructura del proyecto
 ```
 
 ### ⚠️ Reglas
-- Usar verbo en infinitivo
-- No usar mayúsculas iniciales
-- No terminar con punto
-- Un commit = un cambio lógico
+
+* Usar verbo en infinitivo
+* No usar mayúsculas iniciales
+* No terminar con punto
+* Un commit = un cambio lógico
 
 ---
 
@@ -176,11 +183,11 @@ Este backend implementa medidas preventivas para evitar el bloqueo del acceso.
 
 ### Medidas obligatorias
 
-- **Nunca** exponer credenciales en el frontend
-- **Cachear respuestas** según tipo de recurso
-- **Timeouts estrictos** en todas las peticiones
-- **Control de concurrencia**
-- **Evitar peticiones masivas sin filtros**
+* **Nunca** exponer credenciales en el frontend
+* **Cachear respuestas** según tipo de recurso
+* **Timeouts estrictos** en todas las peticiones
+* **Control de concurrencia**
+* **Evitar peticiones masivas sin filtros**
 
 ### Política de cache recomendada
 
@@ -192,9 +199,9 @@ Live TV           → 1–5 minutos
 
 ### Buenas prácticas
 
-- No solicitar listas completas sin categoría
-- No realizar múltiples llamadas concurrentes
-- No aplicar retries infinitos
+* No solicitar listas completas sin categoría
+* No realizar múltiples llamadas concurrentes
+* No aplicar retries infinitos
 
 Estas decisiones son **arquitectónicas** y forman parte del diseño del backend.
 
@@ -203,67 +210,91 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 ## 📡 Endpoints Planeados
 
 ### Películas
-- `GET /movies/categories`
-- `GET /movies`
-- `GET /movies/{id}`
+
+* `GET /movies/categories`
+* `GET /movies`
+* `GET /movies/{id}`
 
 ### Series
-- `GET /series/categories`
-- `GET /series`
-- `GET /series/{id}`
+
+* `GET /series/categories`
+* `GET /series`
+* `GET /series/{id}`
 
 ### Live TV
-- `GET /live/categories`
-- `GET /live`
+
+* `GET /live/categories`
+* `GET /live`
 
 ### Auth
-- `POST /auth/login`
-- `POST /auth/register`
+
+* `POST /auth/login`
+* `POST /auth/register`
 
 ---
 
 ## 📆 Roadmap de Desarrollo (Backend)
 
 ### Día 1
-- Setup del proyecto
-- FastAPI corriendo
-- Health check
+
+* Setup del proyecto
+* FastAPI corriendo
+* Health check
 
 ### Día 2
-- Configuración y entorno
+
+* Configuración y entorno
 
 ### Día 3
-- Cliente Xtream Codes
+
+* Cliente Xtream Codes
 
 ### Día 4
-- Endpoints de películas
+
+* Endpoints de películas
 
 ### Día 5
-- Endpoints de series
+
+* Endpoints de series
 
 ### Día 6
-- Live TV
+
+* Live TV
 
 ### Día 7
-- Base de datos y modelos
+
+* Base de datos y modelos
 
 ### Día 8
-- Autenticación JWT
+
+* Autenticación JWT
 
 ### Día 9
-- Tests
+
+* Tests
 
 ### Día 10
-- Release v1.0.0
+
+* Release v1.0.0
 
 ---
 
 ## 📌 Estado Actual
 
 ```text
-Estado: 🟡 En planificación
-Última fase: Preparación backend
-Próximo paso: Día 1 – Setup del proyecto
+Estado: 🟢 En desarrollo
+Última fase: Día 1 – Setup del proyecto (COMPLETADO)
+Avances:
+- Repositorio y ramas configuradas (main / develop)
+- README y .gitignore iniciales
+- Entorno virtual creado
+- Dependencias base instaladas
+- FastAPI levantado correctamente
+- Endpoint /health operativo
+- Swagger (/docs) funcionando
+Próximo paso: Día 2 – Configuración y entorno
+```
+
 ```
 
 ---
@@ -277,3 +308,4 @@ Cualquier cambio importante en arquitectura, stack o flujo **debe reflejarse aqu
 
 ✍️ Proyecto desarrollado como práctica profesional de backend y arquitectura web.
 
+```

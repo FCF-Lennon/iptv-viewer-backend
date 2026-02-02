@@ -6,6 +6,11 @@ class Settings(BaseSettings):
     debug: bool = False
     database_url: str
 
+    xtream_host: str
+    xtream_username: str
+    xtream_password: str
+    xtream_user_agent: str = "SmartShesPro/1.0"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="forbid"

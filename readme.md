@@ -247,11 +247,14 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ### Día 3
 
-* Cliente Xtream Codes
+* Cliente Xtream Codes implementado y testeado
+* Métodos: `_get`, `get_movies`, `get_series`, `get_live_tv`, `get_categories`
+* Mock tests con pytest (`tests/test_stream.py`)
+* Cliente modular y listo para integrarse a endpoints
 
 ### Día 4
 
-* Endpoints de películas
+* Endpoints de películas **(primera prueba de integración con XtreamClient)**
 
 ### Día 5
 
@@ -283,14 +286,13 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ```text
 Estado: 🟢 En desarrollo
-Última fase: Día 2 – Configuración y entorno (COMPLETADO)
+Última fase: Día 3 – Cliente Xtream Codes (COMPLETADO)
 Avances:
-- Configuración centralizada con pydantic-settings
-- Variables de entorno (.env / .env.example)
-- Settings tipados y validados
-- Manejo estricto de variables extra
-- Backend levantando correctamente con configuración externa
-Próximo paso: Día 3 – Cliente Xtream Codes
+- Cliente Xtream Codes modular y testeable
+- Métodos para películas, series, live TV y categorías
+- Tests con datos mockeados funcionando
+- Backend preparado para recibir requests de Xtream sin exponer credenciales
+Próximo paso: Día 4 – Endpoints de películas
 ```
 
 ```

@@ -47,10 +47,15 @@ class XtreamClient:
             return None
 
     async def get_movies(self) -> List[MovieSchema]:
-        data = await self._get("get_movies")
-        if data:
-            return [MovieSchema(**item) for item in data if isinstance(item, dict)]
-        return []
+        data = await self._get("get_vod_streams")
+        if not data:
+            return []
+
+        return [
+            MovieSchema(**item)
+            for item in data[:50]   # límite SOLO para dev
+            if isinstance(item, dict)
+        ]
 
     async def get_series(self) -> List[SeriesSchema]:
         data = await self._get("get_series")
@@ -71,6 +76,13 @@ class XtreamClient:
         if data:
             return [CategorySchema(**item) for item in data if isinstance(item, dict)]
         return []
+    
+    async def get_movie_categories(self) -> List[CategorySchema]:
+        data = await self._get("get_vod_categories")
+        if data:
+            return [CategorySchema(**item) for item in data if isinstance(item, dict)]
+        return []
+
 
     async def close(self):
         """Cerrar sesión del cliente HTTP."""

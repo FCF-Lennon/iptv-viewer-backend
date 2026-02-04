@@ -146,6 +146,7 @@ backend/
 │   │       └── auth.py
 │   ├── models/
 │   ├── schemas/
+|   |   └── xtream.py 
 │   ├── services/
 │   │   └── xtream_service.py
 │   ├── db/
@@ -209,7 +210,7 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ## 📡 Endpoints Planeados
 
-### Películas
+### Películas ✅
 
 * `GET /movies/categories`
 * `GET /movies`
@@ -254,7 +255,11 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ### Día 4
 
-* Endpoints de películas **(primera prueba de integración con XtreamClient)**
+* Implementación de endpoints de películas
+* Integración real con XtreamClient
+* Endpoint para listado de películas (limitado)
+* Endpoint para categorías de películas
+* Manejo de errores y validación de respuestas
 
 ### Día 5
 
@@ -286,15 +291,14 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ```text
 Estado: 🟢 En desarrollo
-Última fase: Día 3 – Cliente Xtream Codes (COMPLETADO)
+Última fase: Día 4 – Endpoints de películas (COMPLETADO)
 Avances:
-- Cliente Xtream Codes modular y testeable
-- Métodos para películas, series, live TV y categorías
-- Tests con datos mockeados funcionando
-- Backend preparado para recibir requests de Xtream sin exponer credenciales
-Próximo paso: Día 4 – Endpoints de películas
-```
-
+- Endpoints de películas funcionando
+- Integración real con Xtream Codes vía XtreamClient
+- Listado de películas limitado para uso responsable
+- Endpoint de categorías operativo
+- Arquitectura routes → services → schemas consolidada
+Próximo paso: Día 5 – Endpoints de series (replicando patrón limpio)
 ```
 
 ---

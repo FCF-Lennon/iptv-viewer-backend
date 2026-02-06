@@ -216,7 +216,7 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 * `GET /movies`
 * `GET /movies/{id}`
 
-### Series
+### Series ✅
 
 * `GET /series/categories`
 * `GET /series`
@@ -264,6 +264,8 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 ### Día 5
 
 * Endpoints de series
+* Corrección de acceso por ID
+* Ajuste del cliente Xtream (eliminación de método genérico de categorías)
 
 ### Día 6
 
@@ -291,14 +293,14 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ```text
 Estado: 🟢 En desarrollo
-Última fase: Día 4 – Endpoints de películas (COMPLETADO)
+Última fase: Día 5 – Endpoints de Series (COMPLETADO)
 Avances:
-- Endpoints de películas funcionando
-- Integración real con Xtream Codes vía XtreamClient
-- Listado de películas limitado para uso responsable
-- Endpoint de categorías operativo
-- Arquitectura routes → services → schemas consolidada
-Próximo paso: Día 5 – Endpoints de series (replicando patrón limpio)
+- Endpoints de películas y categorías funcionando
+- Endpoints de series y categorías funcionando
+- Corrección de acceso por ID en películas y series
+- Cliente Xtream Codes ajustado a inconsistencias reales de la API
+- Eliminado enfoque genérico de categorías
+Próximo paso: Día 6 – Live TV
 ```
 
 ---

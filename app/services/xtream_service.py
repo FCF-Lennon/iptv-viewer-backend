@@ -68,17 +68,15 @@ class XtreamClient:
         if data:
             return [LiveTVSchema(**item) for item in data if isinstance(item, dict)]
         return []
-
-    async def get_categories(self, content_type: str) -> List[CategorySchema]:
-        if content_type not in ("movies", "series", "live"):
-            raise ValueError("Tipo de contenido inválido")
-        data = await self._get(f"get_{content_type}_categories")
+    
+    async def get_movie_categories(self) -> List[CategorySchema]:
+        data = await self._get("get_vod_categories")
         if data:
             return [CategorySchema(**item) for item in data if isinstance(item, dict)]
         return []
     
-    async def get_movie_categories(self) -> List[CategorySchema]:
-        data = await self._get("get_vod_categories")
+    async def get_series_categories(self) -> List[CategorySchema]:
+        data = await self._get("get_series_categories")
         if data:
             return [CategorySchema(**item) for item in data if isinstance(item, dict)]
         return []

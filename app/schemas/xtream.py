@@ -10,9 +10,11 @@ class MovieSchema(BaseModel):
         from_attributes = True
 
 class SeriesSchema(BaseModel):
-    id: int
-    title: str
-    category_id: Optional[int]
+    series_id: int
+    name: str
+    cover: Optional[str] = None
+    plot: Optional[str] = None
+    rating: Optional[str] = None
 
 class LiveTVSchema(BaseModel):
     id: int

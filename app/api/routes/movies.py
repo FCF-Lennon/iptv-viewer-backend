@@ -35,7 +35,7 @@ async def get_movies():
 
 
 @router.get("/{movie_id}", response_model=MovieSchema)
-async def get_movie(movie_id: int):
+async def get_movie_by_id(movie_id: int):
     client = XtreamClient()
     try:
         movies = await client.get_movies()

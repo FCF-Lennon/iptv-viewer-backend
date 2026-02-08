@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 
 class MovieSchema(BaseModel):
@@ -17,9 +17,15 @@ class SeriesSchema(BaseModel):
     rating: Optional[str] = None
 
 class LiveTVSchema(BaseModel):
-    id: int
-    name:str
-    stream_url: str
+    stream_id: int
+    num: int
+    name: str
+    stream_type: Optional[str] = None
+    category_id: Optional[str] = None
+    container_extension: Optional[str] = None
+    stream_icon: Optional[str] = None
+
+    model_config = ConfigDict(extra="ignore")
 
 class CategorySchema(BaseModel):
     category_id: str

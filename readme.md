@@ -222,7 +222,7 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 * `GET /series`
 * `GET /series/{id}`
 
-### Live TV
+### Live TV ✅
 
 * `GET /live/categories`
 * `GET /live`
@@ -269,7 +269,11 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ### Día 6
 
-* Live TV
+* Implementación de endpoints de Live TV
+* Integración con XtreamClient
+* Esquema LiveTVSchema ajustado a datos reales de Xtream
+* Manejo de campos opcionales y extra="ignore"
+* Limitación de resultados para evitar sobrecarga
 
 ### Día 7
 
@@ -293,14 +297,14 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ```text
 Estado: 🟢 En desarrollo
-Última fase: Día 5 – Endpoints de Series (COMPLETADO)
+Última fase: Día 6 – Live TV (COMPLETADO)
 Avances:
-- Endpoints de películas y categorías funcionando
-- Endpoints de series y categorías funcionando
-- Corrección de acceso por ID en películas y series
-- Cliente Xtream Codes ajustado a inconsistencias reales de la API
-- Eliminado enfoque genérico de categorías
-Próximo paso: Día 6 – Live TV
+- Endpoints de películas, series y live TV funcionando
+- Endpoints de categorías para todos los tipos
+- Schemas alineados a respuestas reales de Xtream Codes
+- Manejo seguro de campos opcionales y datos extra
+- Cliente Xtream robusto frente a inconsistencias de la API
+Próximo paso: Día 7 – Base de datos y modelos
 ```
 
 ---

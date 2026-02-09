@@ -16,3 +16,6 @@ __pycache__/
 
 # Testing
 /tests
+
+#DB
+iptv.db

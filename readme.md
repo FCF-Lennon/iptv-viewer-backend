@@ -277,7 +277,11 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ### Día 7
 
-* Base de datos y modelos
+* Configuración inicial de base de datos con SQLAlchemy
+* Creación de Base y SessionLocal
+* Definición de modelo Favorite
+* Inicialización de SQLite mediante init_db
+* Separación clara entre datos de Xtream y estado propio del backend
 
 ### Día 8
 
@@ -297,14 +301,15 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ```text
 Estado: 🟢 En desarrollo
-Última fase: Día 6 – Live TV (COMPLETADO)
+Última fase: Día 7 – Base de datos (EN PROGRESO)
 Avances:
 - Endpoints de películas, series y live TV funcionando
-- Endpoints de categorías para todos los tipos
 - Schemas alineados a respuestas reales de Xtream Codes
-- Manejo seguro de campos opcionales y datos extra
 - Cliente Xtream robusto frente a inconsistencias de la API
-Próximo paso: Día 7 – Base de datos y modelos
+- Configuración inicial de SQLAlchemy
+- Base de datos SQLite creada
+- Modelo Favorite implementado para persistencia de estado
+Próximo paso: Día 8 – Autenticación y usuarios 
 ```
 
 ---

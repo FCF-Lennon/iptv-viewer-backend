@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     debug: bool = False
     database_url: str
+    jwt_secret: str
 
     xtream_host: str
     xtream_username: str

@@ -145,8 +145,11 @@ backend/
 │   │       ├── live.py
 │   │       └── auth.py
 │   ├── models/
+|   |   ├── favorite.py 
+|   |   └── user.py 
 │   ├── schemas/
-|   |   └── xtream.py 
+|   |   ├── xtream.py 
+|   |   └── auth.py
 │   ├── services/
 │   │   └── xtream_service.py
 │   ├── db/
@@ -173,6 +176,52 @@ DATABASE_URL=sqlite:///./iptv.db
 ```
 
 ⚠️ El archivo `.env` **no se sube al repositorio**.
+
+---
+
+## 🔐 Autenticación y Seguridad
+
+El backend utiliza autenticación basada en JWT (JSON Web Tokens).
+
+### Flujo implementado
+
+1. Usuario se registra (`POST /auth/register`)
+2. Usuario inicia sesión (`POST /auth/login`) → para frontend
+3. El backend genera un token firmado con `JWT_SECRET`
+4. El frontend envía el token en el header:
+
+```http
+Authorization: Bearer <token>
+```
+
+### Nota: 
+/auth/token se mantiene solo para pruebas internas desde Swagger; en producción se debe usar /auth/login.
+
+## Swagger UI
+
+* Para probar endpoints protegidos desde Swagger, se debe usar el botón Authorize y completar usuario y contraseña.
+* Swagger generará el token y lo enviará automáticamente en cada request.
+* Para acceder a rutas protegidas fuera de Swagger (Postman, navegador, curl), siempre se debe enviar el header:
+
+```http
+Authorization: Bearer <token>
+```
+
+Las rutas protegidas validan el token mediante:
+
+- `OAuth2PasswordBearer`: define que se requiere un token Bearer en el header `Authorization`.
+- `get_current_user`: extrae el token y valida la identidad del usuario.
+- Decodificación y verificación del JWT con `python-jose` para asegurar autenticidad y expiración.
+
+
+Las únicas rutas públicas son:
+
+```text
+POST /auth/register
+POST /auth/login
+```
+
+El resto de endpoints pueden requerir autenticación.
 
 ---
 
@@ -227,7 +276,7 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 * `GET /live/categories`
 * `GET /live`
 
-### Auth
+### Auth ✅
 
 * `POST /auth/login`
 * `POST /auth/register`
@@ -285,14 +334,25 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ### Día 8
 
-* Autenticación JWT
+* Implementación de modelo User
+* Registro de usuario
+* Login con validación de credenciales
+* Generación de JWT Firmado
+* Configuración de JWT_SECRET
+* Integración de seguridad con passlib + bcrypt
+* Protección de rutas mediante OAuth2PasswordBearer y get_current_use
+* Ajuste de Swagger para probar rutas protegidas
+* /auth/token solo para pruebas, producción usa /auth/login
 
 ### Día 9
 
-* Tests
+* Limpieza y normalización de datos provenientes de Xtream
 
 ### Día 10
 
+* Tests unitarios y de integración
+
+### Día 11
 * Release v1.0.0
 
 ---
@@ -301,15 +361,17 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ```text
 Estado: 🟢 En desarrollo
-Última fase: Día 7 – Base de datos (EN PROGRESO)
+Última fase: Día 8 – Autenticación JWT (COMPLETADO)
 Avances:
-- Endpoints de películas, series y live TV funcionando
-- Schemas alineados a respuestas reales de Xtream Codes
-- Cliente Xtream robusto frente a inconsistencias de la API
-- Configuración inicial de SQLAlchemy
-- Base de datos SQLite creada
-- Modelo Favorite implementado para persistencia de estado
-Próximo paso: Día 8 – Autenticación y usuarios 
+- Modelo User implementado
+- Registro y login funcionando
+- Hash seguro con bcrypt
+- Generación de JWT firmado correctamente
+- Configuración de JWT_SECRET en entorno
+- Base de datos persistiendo usuarios
+- Protección completa de rutas con validación de token
+- Ajuste de Swagger para permitir probar endpoints protegidos
+Próximo paso: Día 9 – Limpieza y normalización de datos Xtream
 ```
 
 ---

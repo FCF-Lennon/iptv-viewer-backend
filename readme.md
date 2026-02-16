@@ -148,15 +148,19 @@ backend/
 |   |   ├── favorite.py 
 |   |   └── user.py 
 │   ├── schemas/
-|   |   ├── xtream.py 
+│   │   ├── xtream.py        # RawMovieSchema
+│   │   ├── content.py       # ContentItemSchema
 |   |   └── auth.py
 │   ├── services/
-│   │   └── xtream_service.py
+│   │   ├── xtream_service.py
+│   │   └── mappers/
+│   │       └── movie_mapper.py
 │   ├── db/
 │   │   ├── base.py
 │   │   ├── session.py
 │   │   └── init_db.py
-│   └── utils/
+│   ├── utils/
+|   |   └── text_cleaner.py
 ├── tests/
 ├── requirements.txt
 ├── .env.example
@@ -346,7 +350,15 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ### Día 9
 
-* Limpieza y normalización de datos provenientes de Xtream
+* Limpieza y normalización robusta de datos provenientes de Xtream
+* Implementación de RawMovieSchema para manejar inconsistencias de tipos
+* Conversión segura de rating y stream_id
+* Aplicación de limit antes de validación para evitar bloqueos
+* Corrección de mapeo de poster en /movies/{id} (movie_image / cover fallback)
+* Separación clara entre:
+  - Capa cruda (RawSchema)
+  - Capa de limpieza
+  - Capa de normalización
 
 ### Día 10
 
@@ -361,17 +373,16 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ```text
 Estado: 🟢 En desarrollo
-Última fase: Día 8 – Autenticación JWT (COMPLETADO)
+Última fase: Día 9 – Limpieza y normalización de datos Xtream (EN PROGRESO)
+
 Avances:
-- Modelo User implementado
-- Registro y login funcionando
-- Hash seguro con bcrypt
-- Generación de JWT firmado correctamente
-- Configuración de JWT_SECRET en entorno
-- Base de datos persistiendo usuarios
-- Protección completa de rutas con validación de token
-- Ajuste de Swagger para permitir probar endpoints protegidos
-Próximo paso: Día 9 – Limpieza y normalización de datos Xtream
+- Endpoints de movies completamente estabilizados
+- Implementación de RawMovieSchema
+- Normalización segura de tipos inconsistentes
+- Corrección de poster en endpoint por ID
+- Swagger estable sin errores de validación
+- Arquitectura lista para replicarse en series y live TV
+Próximo paso: Replicar arquitectura de normalización en series y live TV
 ```
 
 ---

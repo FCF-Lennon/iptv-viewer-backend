@@ -1,18 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from typing import List, Optional, Union
 
-class MovieSchema(BaseModel):
-    stream_id: int
-    name: str
-    category_id: Optional[str] = None
-    stream_icon: Optional[str] = None
-    rating: Optional[str] = None
-    added: Optional[str] = None
-    container_extension: Optional[str] = None
-    is_adult: Optional[str] = None
-
-    model_config = ConfigDict(extra="ignore")
-
 class RawMovieSchema(BaseModel):
     stream_id: Optional[Union[int, str]] = None  # acepta int o str
     name: Optional[str] = None
@@ -22,13 +10,18 @@ class RawMovieSchema(BaseModel):
     added: Optional[str] = None
     container_extension: Optional[str] = None
     is_adult: Optional[str] = None
+
+    model_config = ConfigDict(extra="ignore")
  
-class SeriesSchema(BaseModel):
-    series_id: int
-    name: str
+class RawSeriesSchema(BaseModel):
+    series_id: Optional[Union[int, str]] = None
+    name: Optional[str] = None
     cover: Optional[str] = None
     plot: Optional[str] = None
-    rating: Optional[str] = None
+    rating: Optional[Union[str, float]] = None
+    category_id: Optional[Union[str, int]] = None
+
+    model_config = ConfigDict(extra="ignore")
 
 class LiveTVSchema(BaseModel):
     stream_id: int

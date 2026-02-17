@@ -2,7 +2,7 @@ import httpx
 import logging
 from typing import Any, Optional, List, Dict
 from app.core.config import setting
-from app.schemas.xtream import SeriesSchema, LiveTVSchema, CategorySchema, RawMovieSchema
+from app.schemas.xtream import LiveTVSchema, CategorySchema, RawMovieSchema, RawSeriesSchema
 from app.utils.text_cleaner import remove_emojis, normalize_whitespace
 
 
@@ -58,21 +58,25 @@ class XtreamClient:
             return None
 
 
-    async def get_movies(self) -> List[RawMovieSchema]:
+    async def get_movies(self, limit: int = 50) -> List[RawMovieSchema]:
         """
-        Trae la lista de películas desde Xtream como RawMovieSchema.
-        No valida ni convierte tipos todavía, solo encapsula los datos crudos.
+        Trae la lista de películas desde Xtream como RawMovieSchema,
+        valida y aplica un límite opcional.
         """
         data = await self._get("get_vod_streams")
         if not data:
             return []
 
-        # Retorna lista de RawMovieSchema (todo como string opcional)
+        # Aplica límite
+        data = data[:limit]
+
+        # Convierte a RawMovieSchema
         return [
             RawMovieSchema.model_validate(item)
             for item in data
             if isinstance(item, dict)
         ]
+
 
     async def get_movie_info(self, vod_id: int) -> Dict:
         """
@@ -82,16 +86,33 @@ class XtreamClient:
         return data or {}
 
 
-    async def get_series(self) -> List[SeriesSchema]:
+    # xtream_service.py
+    async def get_series(self, limit: int = 50) -> List[RawSeriesSchema]:
+        """
+        Trae la lista de series desde Xtream como RawSeriesSchema,
+        valida y aplica un límite opcional.
+        """
         data = await self._get("get_series")
         if not data:
             return []
-        
+
+        # Aplica límite
+        data = data[:limit]
+
+        # Convierte a RawSeriesSchema
         return [
-            SeriesSchema(**item)
-            for item in data[:50]
+            RawSeriesSchema.model_validate(item)
+            for item in data
             if isinstance(item, dict)
         ]
+
+    
+    async def get_series_info(self, series_id: int) -> Dict:
+        """
+        Trae la info detallada de una serie por ID.
+        """
+        data = await self._get("get_series_info", {"series_id": series_id})
+        return data or {}
 
     async def get_live_tv(self) -> List[LiveTVSchema]:
         data = await self._get("get_live_streams")
@@ -130,9 +151,26 @@ class XtreamClient:
     
     async def get_series_categories(self) -> List[CategorySchema]:
         data = await self._get("get_series_categories")
-        if data:
-            return [CategorySchema(**item) for item in data if isinstance(item, dict)]
-        return []
+        if not data:
+            return []
+
+        categories = []
+
+        for item in data:
+            if not isinstance(item, dict):
+                continue
+
+            raw_name = item.get("category_name") or ""
+            clean_name = normalize_whitespace(remove_emojis(raw_name))
+
+            categories.append(
+                CategorySchema(
+                    category_id=item.get("category_id"),
+                    category_name=clean_name
+                )
+            )
+
+        return categories
        
     
     async def get_live_categories(self) -> List[CategorySchema]:

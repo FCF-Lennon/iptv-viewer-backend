@@ -145,22 +145,23 @@ backend/
 │   │       ├── live.py
 │   │       └── auth.py
 │   ├── models/
-|   |   ├── favorite.py 
-|   |   └── user.py 
+│   │   ├── favorite.py 
+│   │   └── user.py 
 │   ├── schemas/
-│   │   ├── xtream.py        # RawMovieSchema
-│   │   ├── content.py       # ContentItemSchema
-|   |   └── auth.py
+│   │   ├── xtream.py
+│   │   ├── content.py
+│   │   └── auth.py
 │   ├── services/
 │   │   ├── xtream_service.py
 │   │   └── mappers/
-│   │       └── movie_mapper.py
+│   │       ├── movie_mapper.py
+│   │       └── series_mapper.py
 │   ├── db/
 │   │   ├── base.py
 │   │   ├── session.py
 │   │   └── init_db.py
 │   ├── utils/
-|   |   └── text_cleaner.py
+│   │   └── text_cleaner.py
 ├── tests/
 ├── requirements.txt
 ├── .env.example
@@ -353,12 +354,16 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 * Limpieza y normalización robusta de datos provenientes de Xtream
 * Implementación de RawMovieSchema para manejar inconsistencias de tipos
 * Conversión segura de rating y stream_id
-* Aplicación de limit antes de validación para evitar bloqueos
+* Aplicación de límite antes de validación para evitar bloqueos
 * Corrección de mapeo de poster en /movies/{id} (movie_image / cover fallback)
 * Separación clara entre:
   - Capa cruda (RawSchema)
   - Capa de limpieza
   - Capa de normalización
+* Normalización de series:
+  - Solo se muestran temporadas con episodios
+  - Episodios ordenados por número
+  - Limpieza de títulos y descripciones
 
 ### Día 10
 

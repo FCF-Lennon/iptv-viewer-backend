@@ -269,12 +269,14 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 * `GET /movies/categories`
 * `GET /movies`
 * `GET /movies/{id}`
+* `GET /movies/{id}/play`
 
 ### Series ✅
 
 * `GET /series/categories`
 * `GET /series`
 * `GET /series/{id}`
+* `GET /movies/{id}/play`
 
 ### Live TV ✅
 
@@ -364,6 +366,11 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
   - Solo se muestran temporadas con episodios
   - Episodios ordenados por número
   - Limpieza de títulos y descripciones
+* Implementación de endpoints de reproducción:
+  - `GET /movies/{id}/play`
+  - `GET /series/{id}/play`
+* Generación segura de URLs de streaming desde backend
+* Encapsulamiento total de credenciales Xtream
 
 ### Día 10
 
@@ -378,16 +385,15 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ```text
 Estado: 🟢 En desarrollo
-Última fase: Día 9 – Limpieza y normalización de datos Xtream (EN PROGRESO)
+Última fase: Día 9 – Normalización avanzada y endpoints de reproducción (EN PROGRESO)
 
 Avances:
-- Endpoints de movies completamente estabilizados
-- Implementación de RawMovieSchema
-- Normalización segura de tipos inconsistentes
-- Corrección de poster en endpoint por ID
-- Swagger estable sin errores de validación
-- Arquitectura lista para replicarse en series y live TV
-Próximo paso: Replicar arquitectura de normalización en series y live TV
+- Endpoints de reproducción implementados para películas y series
+- Generación segura de URLs de streaming desde backend
+- Arquitectura de normalización consolidada en movies y series
+- Separación clara entre capa cruda, limpieza y normalización
+
+Próximo paso: Implementar normalización y endpoint de reproducción en Live TV para cerrar el Día 9
 ```
 
 ---

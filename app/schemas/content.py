@@ -28,6 +28,7 @@ class EpisodeSchema(BaseModel):
     episode_num: Optional[int] = None
     season: Optional[int] = None
     rating: Optional[float] = None
+    container_extension: Optional[str] = None
 
 
 class SeasonSchema(BaseModel):
@@ -40,3 +41,4 @@ class SeriesDetailSchema(ContentItemSchema):
     seasons: List[SeasonSchema] = []
     total_seasons: Optional[int] = None
     total_episodes: Optional[int] = None
+    

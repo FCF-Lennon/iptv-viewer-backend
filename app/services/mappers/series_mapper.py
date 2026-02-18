@@ -9,13 +9,12 @@ from app.utils.text_cleaner import (
 )
 
 def normalize_series(item: dict) -> ContentItemSchema:
-    raw_title = item.get("name", "")
+    raw_title = item.get("name", "") or ""
 
+    # Extraer año usando tu función existente
     year = extract_year(raw_title)
-
-    title = remove_year(raw_title)
-    title = remove_emojis(title)
-    title = normalize_whitespace(title)
+    # Quitar año y limpiar título en una sola línea
+    title = normalize_whitespace(remove_emojis(remove_year(raw_title)))
 
     rating = safe_float(item.get("rating"))
 
@@ -23,12 +22,13 @@ def normalize_series(item: dict) -> ContentItemSchema:
         id=int(item.get("series_id")),
         title=title,
         type="series",
-        description=None, # sin descriptción
+        description=None,  # sin descripción
         year=year,
-        poster=item.get("cover"),  # aquí es cover, no stream_icon
+        poster=item.get("cover"),
         category=str(item.get("category_id")) if item.get("category_id") else None,
         rating=rating
     )
+
 
 def normalize_series_detail(raw: dict, series_id: int) -> dict:
     info = raw.get("info", {})
@@ -40,20 +40,21 @@ def normalize_series_detail(raw: dict, series_id: int) -> dict:
 
     for s in seasons_raw:
         season_number = safe_int(s.get("season_number"))
-        episode_list = []
-
-        # Reconstruir episodios usando episodes_raw
         season_eps = episodes_raw.get(str(season_number), [])
-        for ep in season_eps:
-            episode_list.append({
+
+        # Construir lista de episodios de forma más directa
+        episode_list = [
+            {
                 "id": safe_int(ep.get("id")),
                 "title": normalize_whitespace(remove_emojis(ep.get("title", ""))),
                 "episode_num": safe_int(ep.get("episode_num")),
                 "season": season_number,
                 "rating": safe_float(ep.get("rating") or ep.get("info", {}).get("rating")),
-            })
+                "container_extension": ep.get("container_extension"),
+            }
+            for ep in season_eps
+        ]
 
-        # Solo agregar temporadas con episodios
         if episode_list:
             total_episodes += len(episode_list)
             seasons.append({

@@ -9,7 +9,7 @@ from app.utils.text_cleaner import remove_emojis, normalize_whitespace
 logger = logging.getLogger(__name__)
 
 class XtreamClient:
-    """Cliente para consumir la API de Xtream Codes de manera segura."""
+    """Cliente para consumir la API de Xtream Codes de manera segura. con cache de episodios."""
 
     def __init__(self):
         self.host = setting.xtream_host
@@ -21,8 +21,6 @@ class XtreamClient:
             timeout=10.0,
             headers={"User-Agent": self.user_agent}
         )
-
-    from typing import Any, Optional
 
     async def _get(self, action: str, extra_params: Optional[dict] = None) -> Optional[Any]:
         params = {
@@ -84,9 +82,8 @@ class XtreamClient:
         """
         data = await self._get("get_vod_info", {"vod_id": vod_id})
         return data or {}
+    
 
-
-    # xtream_service.py
     async def get_series(self, limit: int = 50) -> List[RawSeriesSchema]:
         """
         Trae la lista de series desde Xtream como RawSeriesSchema,
@@ -182,3 +179,6 @@ class XtreamClient:
     async def close(self):
         """Cerrar sesión del cliente HTTP."""
         await self.client.aclose()
+
+    
+    

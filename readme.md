@@ -155,7 +155,8 @@ backend/
 │   │   ├── xtream_service.py
 │   │   └── mappers/
 │   │       ├── movie_mapper.py
-│   │       └── series_mapper.py
+│   │       ├── series_mapper.py
+|   |       └── live_mapper.py
 │   ├── db/
 │   │   ├── base.py
 │   │   ├── session.py
@@ -282,6 +283,7 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 * `GET /live/categories`
 * `GET /live`
+* `GET /live/{id}/play`
 
 ### Auth ✅
 
@@ -371,12 +373,38 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
   - `GET /series/{id}/play`
 * Generación segura de URLs de streaming desde backend
 * Encapsulamiento total de credenciales Xtream
+* implementar RawLiveSchema para manejar inconsistencias de Xtream
+* crear normalize_live() siguiendo el mismo flujo que movies y series
+* Endpoint /live/{id}/play genera URLs de reproducción seguras
+* Limpieza de títulos y extracción de calidad y país integrada
 
 ### Día 10
 
-* Tests unitarios y de integración
+Objetivo: 
+
+* Validar reproducibilidad de streams y reducir requests innecesarios mediante cache
+
+Alcance:
+
+* Validación parcial de reproducción usando header Range
+* Validación por serie (primer episodio)
+* Cache en memoria con TTL configurable
+* Límite de concurrencia con asyncio.Semaphore
+* Protección anti-bloqueo de credenciales
+* Documentación técnica del mecanismo
+
+Resultado esperado:
+
+* Catálogo limpio y consistente (similar a TVBox)
+* Reducción de requests innecesarios a Xtream
+* Mejor arquitectura backend y escalabilidad
 
 ### Día 11
+
+* Tests unitarios y de integración
+
+### Día 12
+
 * Release v1.0.0
 
 ---
@@ -385,15 +413,15 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 ```text
 Estado: 🟢 En desarrollo
-Última fase: Día 9 – Normalización avanzada y endpoints de reproducción (EN PROGRESO)
+Última fase: Día 9 – Normalización avanzada y endpoints de reproducción (Terminado)
 
 Avances:
-- Endpoints de reproducción implementados para películas y series
+- Endpoints de reproducción implementados para películas, series y Live TV
 - Generación segura de URLs de streaming desde backend
-- Arquitectura de normalización consolidada en movies y series
+- Arquitectura de normalización consolidada
 - Separación clara entre capa cruda, limpieza y normalización
 
-Próximo paso: Implementar normalización y endpoint de reproducción en Live TV para cerrar el Día 9
+Próximo paso: Día 10 –  Validación de Streams y Capa de Cache
 ```
 
 ---

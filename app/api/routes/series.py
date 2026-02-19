@@ -5,7 +5,7 @@ from app.services.xtream_service import XtreamClient
 from app.schemas.content import ContentItemSchema, SeriesDetailSchema
 from app.core.config import setting
 from app.core.security import get_current_user
-from app.services.mappers.series_mapper import normalize_series, normalize_series_detail, safe_int, normalize_whitespace, remove_emojis
+from app.services.mappers.series_mapper import normalize_series, normalize_series_detail
 
 router = APIRouter(
     prefix="/series",

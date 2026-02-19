@@ -23,14 +23,19 @@ class RawSeriesSchema(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-class LiveTVSchema(BaseModel):
-    stream_id: int
-    num: int
-    name: str
+class RawLiveSchema(BaseModel):
+    num: Optional[int]
+    stream_id: Optional[int]
+    name: Optional[str]
     stream_type: Optional[str] = None
-    category_id: Optional[str] = None
-    container_extension: Optional[str] = None
-    stream_icon: Optional[str] = None
+    stream_icon: Optional[str] 
+    epg_channel_id: Optional[str] = None
+    added: Optional[str] = None
+    category_id: Optional[str] 
+    custom_sid: Optional[str] = None
+    tv_archive: Optional[int] = None
+    direct_source: Optional[str] = None
+    tv_archive_duration: Optional[int] = None
 
     model_config = ConfigDict(extra="ignore")
 

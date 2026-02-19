@@ -23,6 +23,12 @@ def extract_country(text: str):
     match = re.match(r"([A-Z]{2})\s\|", text)
     return match.group(1) if match else None
 
+def remove_country(text: str) -> str:
+    return re.sub(r"^[A-Z]{2}\s\|", "", text).strip() if text else ""
+
+def remove_quality(text: str) -> str:
+    return re.sub(r"\b(HD|SD|FHD|4K|1080p|720p)\b", "", text, flags=re.IGNORECASE).strip() if text else ""
+
 def clean_special_chars(text: str):
     text = remove_emojis(text)
     text = re.sub(r"[#]+", "", text)
@@ -39,3 +45,4 @@ def safe_int(value):
         return int(value)
     except (TypeError, ValueError):
         return None
+    

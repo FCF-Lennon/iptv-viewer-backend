@@ -2,7 +2,7 @@ import httpx
 import logging
 from typing import Any, Optional, List, Dict
 from app.core.config import setting
-from app.schemas.xtream import LiveTVSchema, CategorySchema, RawMovieSchema, RawSeriesSchema
+from app.schemas.xtream import RawLiveSchema, CategorySchema, RawMovieSchema, RawSeriesSchema
 from app.utils.text_cleaner import remove_emojis, normalize_whitespace
 
 
@@ -111,14 +111,18 @@ class XtreamClient:
         data = await self._get("get_series_info", {"series_id": series_id})
         return data or {}
 
-    async def get_live_tv(self) -> List[LiveTVSchema]:
+    async def get_live_tv(self, limit: int = 50) -> List[RawLiveSchema]:
         data = await self._get("get_live_streams")
+        
+
         if not data:
             return []
         
+        data = data[:limit]
+        
         return [
-            LiveTVSchema(**item)
-            for item in data[:50]
+            RawLiveSchema.model_validate(item)
+            for item in data
             if isinstance(item, dict)
         ]
     
@@ -172,9 +176,26 @@ class XtreamClient:
     
     async def get_live_categories(self) -> List[CategorySchema]:
         data = await self._get("get_live_categories")
-        if data:
-            return[CategorySchema(**item) for item in data if isinstance(item, dict)]
-        return []
+        if not data:
+            return []
+
+        categories = []
+
+        for item in data:
+            if not isinstance(item, dict):
+                continue
+
+            raw_name = item.get("category_name") or ""
+            clean_name = normalize_whitespace(remove_emojis(raw_name))
+
+            categories.append(
+                CategorySchema(
+                    category_id=item.get("category_id"),
+                    category_name=clean_name
+                )
+            )
+
+        return categories
 
     async def close(self):
         """Cerrar sesión del cliente HTTP."""

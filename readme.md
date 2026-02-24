@@ -277,7 +277,7 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 * `GET /series/categories`
 * `GET /series`
 * `GET /series/{id}`
-* `GET /movies/{id}/play`
+* `GET /series/{id}/play`
 
 ### Live TV ✅
 
@@ -382,6 +382,30 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 Objetivo: 
 
+* Implementar segmentación del catálogo por categoría directamente en Xtream
+
+Alcance:
+
+* Extensión de XtreamClient para soportar category_id opcional
+* Modificación de: get_movies, get_series, get_live_tv
+* Aplicación de filtro en origen (Xtream) mediante extra_params
+* Extensión de endpoints existentes con query param opcional:
+  * `GET /movies?category_id=`
+  * `GET /series?category_id=`
+  * `GET /live?category_id=`
+* Compatibilidad hacia atrás garantizada
+* Preparación arquitectónica para futura capa de cache por categoría
+
+Resultado esperado:
+
+* Reducción de carga innecesaria
+* Mejor segmentación del catálogo
+* Base sólida para cache inteligente
+
+### Día 11
+
+Objetivo: 
+
 * Validar reproducibilidad de streams y reducir requests innecesarios mediante cache
 
 Alcance:
@@ -399,11 +423,11 @@ Resultado esperado:
 * Reducción de requests innecesarios a Xtream
 * Mejor arquitectura backend y escalabilidad
 
-### Día 11
+### Día 12
 
 * Tests unitarios y de integración
 
-### Día 12
+### Día 13
 
 * Release v1.0.0
 
@@ -413,15 +437,16 @@ Resultado esperado:
 
 ```text
 Estado: 🟢 En desarrollo
-Última fase: Día 9 – Normalización avanzada y endpoints de reproducción (Terminado)
+Última fase: Día 10 – Segmentación por Categoría en Origen (Terminado)
 
 Avances:
-- Endpoints de reproducción implementados para películas, series y Live TV
-- Generación segura de URLs de streaming desde backend
-- Arquitectura de normalización consolidada
-- Separación clara entre capa cruda, limpieza y normalización
+- Segmentación del catálogo por category_id directamente en Xtream
+- Extensión de endpoints existentes con query param opcional
+- Compatibilidad hacia atrás mantenida
+- Reducción de carga innecesaria en catálogo
+- Arquitectura preparada para cache por categoría
 
-Próximo paso: Día 10 –  Validación de Streams y Capa de Cache
+Próximo paso: Día 11 – Validación de Streams y Capa de Cache Inteligente
 ```
 
 ---

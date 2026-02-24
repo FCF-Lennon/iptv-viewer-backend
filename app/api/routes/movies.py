@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from typing import List
+from typing import List, Optional
 
 from app.services.xtream_service import XtreamClient
 from app.schemas.xtream import CategorySchema
@@ -33,14 +33,14 @@ async def get_movie_categories(
 
 
 @router.get("/", response_model=List[ContentItemSchema], response_model_exclude_none=True)
-async def get_movies(current_user: str = Depends(get_current_user), limit: int = 50):
+async def get_movies(current_user: str = Depends(get_current_user), limit: int = 50, category_id: Optional[str] = None):
     """
     Trae películas normalizadas para frontend, con límite opcional.
     """
     client = XtreamClient()
 
     try:
-        raw_objects = await client.get_movies(limit=limit)
+        raw_objects = await client.get_movies(limit=limit, category_id=category_id)
         # Normaliza cada película usando normalize_movie
         normalized = [normalize_movie(obj.model_dump()) for obj in raw_objects]
 

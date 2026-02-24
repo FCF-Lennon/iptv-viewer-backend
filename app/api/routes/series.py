@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from typing import List
+from typing import List, Optional
 
 from app.services.xtream_service import XtreamClient
 from app.schemas.content import ContentItemSchema, SeriesDetailSchema
@@ -24,10 +24,10 @@ async def get_series_categories(current_user: str = Depends(get_current_user)):
 
 
 @router.get("/", response_model=List[ContentItemSchema], response_model_exclude_none=True)
-async def get_series(current_user: str = Depends(get_current_user), limit: int = 50):
+async def get_series(current_user: str = Depends(get_current_user), limit: int = 50, category_id: Optional[str] = None):
     client = XtreamClient()
     try:
-        raw_data = await client.get_series(limit=limit)
+        raw_data = await client.get_series(limit=limit, category_id=category_id)
 
         normalized = [normalize_series(obj.model_dump()) for obj in raw_data]
 

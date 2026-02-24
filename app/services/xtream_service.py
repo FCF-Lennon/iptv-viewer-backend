@@ -56,12 +56,13 @@ class XtreamClient:
             return None
 
 
-    async def get_movies(self, limit: int = 50) -> List[RawMovieSchema]:
+    async def get_movies(self, limit: int = 50, category_id: Optional[str] = None) -> List[RawMovieSchema]:
         """
         Trae la lista de películas desde Xtream como RawMovieSchema,
         valida y aplica un límite opcional.
         """
-        data = await self._get("get_vod_streams")
+        extra = {"category_id": category_id} if category_id else None
+        data = await self._get("get_vod_streams", extra)
         if not data:
             return []
 
@@ -84,12 +85,13 @@ class XtreamClient:
         return data or {}
     
 
-    async def get_series(self, limit: int = 50) -> List[RawSeriesSchema]:
+    async def get_series(self, limit: int = 50, category_id: Optional[str] = None) -> List[RawSeriesSchema]:
         """
         Trae la lista de series desde Xtream como RawSeriesSchema,
         valida y aplica un límite opcional.
         """
-        data = await self._get("get_series")
+        extra = {"category_id": category_id} if category_id else None
+        data = await self._get("get_series", extra)
         if not data:
             return []
 
@@ -111,10 +113,11 @@ class XtreamClient:
         data = await self._get("get_series_info", {"series_id": series_id})
         return data or {}
 
-    async def get_live_tv(self, limit: int = 50) -> List[RawLiveSchema]:
-        data = await self._get("get_live_streams")
+    async def get_live_tv(self, limit: int = 50, category_id: Optional[str] = None) -> List[RawLiveSchema]:
         
-
+        extra = {"category_id": category_id} if category_id else None
+        data = await self._get("get_live_streams", extra)
+        
         if not data:
             return []
         

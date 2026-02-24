@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from typing import List
+from typing import List, Optional
 from fastapi import Depends
 
 from app.services.xtream_service import XtreamClient
@@ -24,10 +24,10 @@ async def get_live_categories(current_user: str = Depends(get_current_user), lim
         await client.close()
         
 @router.get("/", response_model=List[ContentItemSchema], response_model_exclude_none=True)
-async def get_live_streams(current_user: str = Depends(get_current_user), limit: int = 50):
+async def get_live_streams(current_user: str = Depends(get_current_user), limit: int = 50, category_id: Optional[str] = None):
     client = XtreamClient()
     try:
-        raw_objects = await client.get_live_tv()
+        raw_objects = await client.get_live_tv(category_id=category_id)
         return [normalize_live(obj.model_dump()) for obj in raw_objects]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error obteniendo canales: {str(e)}")

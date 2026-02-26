@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional
 
 from app.services.xtream_service import XtreamClient
+from app.services.stream_validator import validate_stream
 from app.schemas.content import ContentItemSchema, SeriesDetailSchema
 from app.core.config import setting
 from app.core.security import get_current_user
@@ -81,6 +82,12 @@ async def get_episode_play_url(series_id: int, episode_id: int, current_user: st
             raise HTTPException(status_code=400, detail="No se encontró formato de reproducción")
 
         play_url = f"{setting.xtream_host}/series/{setting.xtream_username}/{setting.xtream_password}/{episode_id}.{container_ext}"
+        
+        is_valid = await validate_stream("series", series_id, play_url)
+
+        if not is_valid:
+            raise HTTPException(status_code=404, detail="Stream not available")
+        
         return {"play_url": play_url}
 
     finally:

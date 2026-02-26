@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional
 
 from app.services.xtream_service import XtreamClient
+from app.services.stream_validator import validate_stream
 from app.schemas.xtream import CategorySchema
 from app.core.security import get_current_user
 from app.schemas.content import ContentItemSchema
@@ -71,7 +72,10 @@ async def get_movie_by_id(
 
 
 @router.get("/{movie_id}/play")
-async def get_movie_play_url(movie_id: int, current_user: str = Depends(get_current_user)):
+async def get_movie_play_url(
+    movie_id: int,
+    current_user: str = Depends(get_current_user)
+):
     """
     Devuelve la URL de reproducción para la película seleccionada.
     """
@@ -82,23 +86,26 @@ async def get_movie_play_url(movie_id: int, current_user: str = Depends(get_curr
 
         if not data:
             raise HTTPException(status_code=404, detail="Película no encontrada")
-        
+
         movie_data = data.get("movie_data", {})
         container_extension = movie_data.get("container_extension")
 
         if not container_extension:
             raise HTTPException(status_code=400, detail="No se encontró formato de reproducción")
-        
+
         play_url = (
             f"{setting.xtream_host}"
             f"/movie/{setting.xtream_username}/{setting.xtream_password}"
             f"/{movie_id}.{container_extension}"
         )
 
+        is_valid = await validate_stream("movie", movie_id, play_url)
+
+        if not is_valid:
+            raise HTTPException(status_code=404, detail="Stream not available")
+
         return {"play_url": play_url}
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generando URL de reproducción: {str(e)}")
     finally:
         await client.close()
     

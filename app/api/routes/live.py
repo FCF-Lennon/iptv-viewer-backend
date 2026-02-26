@@ -3,6 +3,7 @@ from typing import List, Optional
 from fastapi import Depends
 
 from app.services.xtream_service import XtreamClient
+from app.services.stream_validator import validate_stream
 from app.schemas.xtream import CategorySchema
 from app.schemas.content import ContentItemSchema
 from app.core.security import get_current_user, setting
@@ -44,5 +45,10 @@ async def get_live_play_url(
         f"/live/{setting.xtream_username}/{setting.xtream_password}"
         f"/{live_id}.ts"
     )
+
+    is_valid = await validate_stream("live", live_id, play_url)
+
+    if not is_valid:
+        raise HTTPException(status_code=404, detail="Stream not available")
 
     return {"play_url": play_url}

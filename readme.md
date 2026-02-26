@@ -153,10 +153,11 @@ backend/
 │   │   └── auth.py
 │   ├── services/
 │   │   ├── xtream_service.py
+│   │   ├── stream_validator.py      ← NUEVO (valida si el stream responde)
 │   │   └── mappers/
 │   │       ├── movie_mapper.py
 │   │       ├── series_mapper.py
-|   |       └── live_mapper.py
+│   │       └── live_mapper.py
 │   ├── db/
 │   │   ├── base.py
 │   │   ├── session.py
@@ -382,25 +383,48 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 Objetivo: 
 
-* Implementar segmentación del catálogo por categoría directamente en Xtream
+* Validar reproducibilidad de streams
+* Reducir requests innecesarios a Xtream
+* Agregar capa de cache con TTL y control de concurrencia
 
 Alcance:
 
-* Extensión de XtreamClient para soportar category_id opcional
-* Modificación de: get_movies, get_series, get_live_tv
-* Aplicación de filtro en origen (Xtream) mediante extra_params
-* Extensión de endpoints existentes con query param opcional:
-  * `GET /movies?category_id=`
-  * `GET /series?category_id=`
-  * `GET /live?category_id=`
-* Compatibilidad hacia atrás garantizada
-* Preparación arquitectónica para futura capa de cache por categoría
+* Implementación de validate_stream(stream_type, stream_id, url) como única interfaz pública
+* Separación interna de validadores:
+  * _check_vod (HEAD para movies y series)
+  * _check_live (HEAD liviano para Live TV)
+* Eliminación de validación profunda por chunks en Live (evita carga infinita)
+* Implementación de cache en memoria:
+  * Key basada en stream_type:stream_id
+  * TTL configurable por tipo
+* Configuración TTL:
+  * Live → 15 minutos
+  * Movie → 24 horas
+  * Series → 24 horas
+* Implementación de _validation_semaphore para limitar concurrencia (máx 5 validaciones simultáneas)
+* Prevención de múltiples requests simultáneos hacia Xtream
+* Integración de validación en endpoints:
+  - `/movies/{id}/play`
+  - `/series/{id}/play`
+  - `/live/{id}/play`
+* Corrección de bloqueo en Live causado por lectura de chunks infinitos
+* Optimización de tiempo de respuesta en reproducción
+
+Decisión arquitectónica importante:
+
+* Live TV no se valida mediante lectura de flujo completo.
+* Solo se valida mediante HEAD + status + content-type.
+* Streams que respondan 200 pero no transmitan señal pueden seguir apareciendo
+  (limitación propia del ecosistema IPTV).
 
 Resultado esperado:
 
-* Reducción de carga innecesaria
-* Mejor segmentación del catálogo
-* Base sólida para cache inteligente
+* Eliminada carga infinita en endpoints Live
+* Capa de validación consistente y unificada
+* Backend protegido ante validaciones masivas
+* Reducción de riesgo de bloqueo por parte del proveedor Xtream
+
+Estado: Día 11 aún en progreso (pendiente mejora futura con background validation)
 
 ### Día 11
 
@@ -437,16 +461,20 @@ Resultado esperado:
 
 ```text
 Estado: 🟢 En desarrollo
-Última fase: Día 10 – Segmentación por Categoría en Origen (Terminado)
+Última fase: Día 11 – Validación de Streams y Cache Inteligente (En progreso)
 
 Avances:
-- Segmentación del catálogo por category_id directamente en Xtream
-- Extensión de endpoints existentes con query param opcional
-- Compatibilidad hacia atrás mantenida
-- Reducción de carga innecesaria en catálogo
-- Arquitectura preparada para cache por categoría
+- Implementación de validate_stream unificado
+- Cache en memoria con TTL configurable por tipo
+- Límite de concurrencia con asyncio.Semaphore
+- Eliminación de validación bloqueante en Live
+- Optimización de endpoints de reproducción
+- Protección contra sobrecarga a Xtream
 
-Próximo paso: Día 11 – Validación de Streams y Capa de Cache Inteligente
+Próximo paso:
+- Persistencia opcional de estado is_valid
+- Evaluar validación en background
+- Logging estructurado de streams inválidos
 ```
 
 ---

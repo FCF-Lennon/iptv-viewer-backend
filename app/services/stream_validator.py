@@ -5,11 +5,18 @@ from typing import Dict
 
 _validation_semaphore = asyncio.Semaphore(5)
 _stream_cache: Dict[str, Dict] = {}
+_pending_revalidations: set[str] = set()
 
-TTL_CONFIG = {
-    "live": 900,       # 15 min
-    "movie": 86400,    # 24h
+TTL_VALID = {
+    "live": 900,    # 15 min
+    "movie": 86400, # 24h
     "series": 86400
+}
+
+TTL_INVALID = {
+    "live": 300,
+    "movie": 1800,
+    "series": 1800
 }
 
 # -------------------------
@@ -19,9 +26,14 @@ TTL_CONFIG = {
 def _cache_key(stream_type: str, stream_id: int) -> str:
     return f"{stream_type}:{stream_id}"
 
-def _cache_valid(entry: Dict, ttl: int) -> bool:
+def _cache_valid(entry: Dict, stream_type: str) -> bool:
+    ttl = _get_ttl(stream_type, entry["valid"])
     return (time.time() - entry["checked_at"]) < ttl
 
+def _get_ttl(stream_type: str, is_valid: bool) -> int:
+    if is_valid:
+        return TTL_VALID.get(stream_type, 36000)
+    return TTL_INVALID.get(stream_type, 600)
 
 # -------------------------
 # VALIDADORES INTERNOS
@@ -60,11 +72,11 @@ async def _check_live(url: str) -> bool:
             if response.status_code not in (200, 206):
                 return False
 
-            content_type = response.headers.get("content-type", "")
+            content_type = response.headers.get("content-type", "").lower()
 
             if not (
                 content_type.startswith("video/") or
-                content_type.startswith("application/vnd.apple.mpegurl") or
+                "mpegurl" in content_type or
                 content_type.startswith("application/octet-stream")
             ):
                 return False
@@ -79,27 +91,54 @@ async def _check_live(url: str) -> bool:
 # FUNCIÓN PÚBLICA ÚNICA
 # -------------------------
 
+async def _background_revalidate(key: str, stream_type: str, url: str):
+    try:
+        async with _validation_semaphore:
+            if stream_type == "live":
+                is_valid = await _check_live(url)
+            else:
+                is_valid = await _check_vod(url)
+            
+            _stream_cache[key] = {
+                "valid": is_valid,
+                "checked_at": time.time()
+            }
+    finally:
+        _pending_revalidations.discard(key)
+
 async def validate_stream(stream_type: str, stream_id: int, url: str) -> bool:
     key = _cache_key(stream_type, stream_id)
-    ttl = TTL_CONFIG.get(stream_type, 3600)
 
-    # 🔹 1️⃣ Cache hit
-    if key in _stream_cache:
-        entry = _stream_cache[key]
-        if _cache_valid(entry, ttl):
-            return entry["valid"]
+    entry = _stream_cache.get(key)
 
-    # 🔹 2️⃣ Validación controlada por semaphore
-    async with _validation_semaphore:
+    # 1️⃣ No existe cache
+    if not entry:
+        async with _validation_semaphore:
 
-        if stream_type == "live":
-            is_valid = await _check_live(url)
-        else:
-            is_valid = await _check_vod(url)
+            if stream_type == "live":
+                is_valid = await _check_live(url)
+            else:
+                is_valid = await _check_vod(url)
 
-        _stream_cache[key] = {
-            "valid": is_valid,
-            "checked_at": time.time()
-        }
+            _stream_cache[key] = {
+                "valid": is_valid,
+                "checked_at": time.time()
+            }
 
-        return is_valid
+            return is_valid
+
+    # 2️⃣ Cache válido dentro de TTL dinámico
+    if _cache_valid(entry, stream_type):
+        return entry["valid"]
+
+    # 3️⃣ Cache expirado → Stale-While-Revalidate
+
+    # Lanzar revalidación si no está en curso
+    if key not in _pending_revalidations:
+        _pending_revalidations.add(key)
+        asyncio.create_task(
+            _background_revalidate(key, stream_type, url)
+        )
+
+    # Retornar valor viejo inmediatamente
+    return entry["valid"]

@@ -383,6 +383,30 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 Objetivo: 
 
+* Implementar segmentación del catálogo directamente en Xtream para reducir carga innecesaria y mejorar organización.
+
+Alcance:
+
+* Extensión de XtreamClient para soportar category_id opcional
+* Modificación de: get_movies, get_series, get_live_tv
+* Aplicación de filtro en origen (Xtream) mediante extra_params
+* Extensión de endpoints existentes con query param opcional:
+  * `GET /movies?category_id=`
+  * `GET /series?category_id=`
+  * `GET /live?category_id=`
+* Compatibilidad hacia atrás garantizada
+* Preparación arquitectónica para futura cache por categoría
+
+Resultado esperado:
+
+* Reducción de carga innecesaria
+* Mejor segmentación del catálogo
+* Base sólida para optimización futura
+
+### Día 11
+
+Objetivo: 
+
 * Validar reproducibilidad de streams
 * Reducir requests innecesarios a Xtream
 * Agregar capa de cache con TTL y control de concurrencia
@@ -425,27 +449,6 @@ Resultado esperado:
 * Reducción de riesgo de bloqueo por parte del proveedor Xtream
 
 Estado: Día 11 aún en progreso (pendiente mejora futura con background validation)
-
-### Día 11
-
-Objetivo: 
-
-* Validar reproducibilidad de streams y reducir requests innecesarios mediante cache
-
-Alcance:
-
-* Validación parcial de reproducción usando header Range
-* Validación por serie (primer episodio)
-* Cache en memoria con TTL configurable
-* Límite de concurrencia con asyncio.Semaphore
-* Protección anti-bloqueo de credenciales
-* Documentación técnica del mecanismo
-
-Resultado esperado:
-
-* Catálogo limpio y consistente (similar a TVBox)
-* Reducción de requests innecesarios a Xtream
-* Mejor arquitectura backend y escalabilidad
 
 ### Día 12
 

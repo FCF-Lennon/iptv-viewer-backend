@@ -83,7 +83,7 @@ async def get_episode_play_url(series_id: int, episode_id: int, current_user: st
 
         play_url = f"{setting.xtream_host}/series/{setting.xtream_username}/{setting.xtream_password}/{episode_id}.{container_ext}"
         
-        is_valid = await validate_stream("series", series_id, play_url)
+        is_valid = await validate_stream("series", episode_id, play_url)
 
         if not is_valid:
             raise HTTPException(status_code=404, detail="Stream not available")

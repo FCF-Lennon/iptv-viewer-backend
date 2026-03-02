@@ -455,13 +455,15 @@ Objetivo:
 * Consolidar estabilidad del backend y preparar base para release
 
 Alcance:
-
+* Corrección en endpoint de series: 
+  - validación de stream ahora se realiza por episode_id en lugar de series_id
 * Tests unitarios para stream_validator
 * Tests de integración para endpoints /play
 * Refactor menor si es necesario
 * Validación de comportamiento del cache
 * Limpieza de código y revisión de timeouts
 * Preparación de documentación para v1.0.0
+
 
 ### Día 13
 
@@ -473,9 +475,10 @@ Alcance:
 
 ```text
 Estado: 🟢 En desarrollo
-Última fase: Día 11 – Validación de Streams y Cache Inteligente (COMPLETADO)
+Última fase: Día 12 – Tests unitarios y de integración (EN PROGRESO)
 
 Avances:
+- Corrección de validación de streams en episodios de series ✅
 - Segmentación del catálogo por categoría directamente en Xtream
 - Implementación de validate_stream como interfaz unificada
 - Validación liviana de VOD y Live mediante HEAD
@@ -485,7 +488,8 @@ Avances:
 - Integración de validación en endpoints /play
 - Protección contra sobrecarga y bloqueos por parte de Xtream
 
-Próximo paso: Día 12 – Tests unitarios y de integración
+
+Próximo paso: seguir con Día 12 (tests)
 ```
 
 ---

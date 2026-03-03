@@ -23,9 +23,11 @@ def normalize_live(item: dict) -> ContentItemSchema:
     # Limpieza consistente
     cleaned_title = clean_special_chars(raw_title)
     cleaned_title = normalize_whitespace(cleaned_title)
+
     cleaned_title = remove_quality(cleaned_title)
     cleaned_title = remove_country(cleaned_title)
 
+    
     return ContentItemSchema(
         id=safe_int(stream_id),
         title=cleaned_title,

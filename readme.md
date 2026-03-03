@@ -153,7 +153,7 @@ backend/
 │   │   └── auth.py
 │   ├── services/
 │   │   ├── xtream_service.py
-│   │   ├── stream_validator.py      ← NUEVO (valida si el stream responde)
+│   │   ├── stream_validator.py      
 │   │   └── mappers/
 │   │       ├── movie_mapper.py
 │   │       ├── series_mapper.py
@@ -165,6 +165,13 @@ backend/
 │   ├── utils/
 │   │   └── text_cleaner.py
 ├── tests/
+│   ├── unit/
+│   │   └── test_stream_validator.py
+│   ├── integration/
+│   │   └── test_play_endpoints.py
+│   ├── fixtures/       # carpeta vacía por ahora
+│   └── test_stream.py  
+├── pytest.ini
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -452,18 +459,56 @@ Resultado:
 
 Objetivo: 
 
-* Consolidar estabilidad del backend y preparar base para release
+* Consolidar estabilidad del backend
+* Validar comportamiento real de reproducción
+* Preparar base sólida para release v1.0.0
 
-Alcance:
-* Corrección en endpoint de series: 
-  - validación de stream ahora se realiza por episode_id en lugar de series_id
-* Tests unitarios para stream_validator
-* Tests de integración para endpoints /play
-* Refactor menor si es necesario
-* Validación de comportamiento del cache
-* Limpieza de código y revisión de timeouts
-* Preparación de documentación para v1.0.0
+Alcance implementado:
 
+* Corrección en endpoint de series:
+  - Validación ahora se realiza por `episode_id`
+  - Eliminación de validación incorrecta por `series_id`
+* Ajuste final de integración entre endpoints `/play` y `validate_stream`
+
+Testing:
+
+Tests unitarios:
+
+* Cobertura completa de `stream_validator`
+* Validación de:
+  - Cache miss
+  - Cache válido
+  - Cache expirado (stale-while-revalidate)
+  - Control de concurrencia
+  - Prevención de validaciones duplicadas simultáneas
+
+Tests de integración:
+
+* `/movies/{id}/play`
+* `/series/{series_id}/{episode_id}/play`
+* `/live/{id}/play`
+
+Escenarios cubiertos:
+
+* Stream válido
+* Stream inválido
+* Recurso inexistente
+* Episodio inexistente
+* Manejo correcto de códigos HTTP (200, 404, 400)
+
+Refactor técnico:
+
+* Migración de `@app.on_event("startup")` a sistema moderno de `lifespan`
+* Eliminación de advertencias deprecadas de FastAPI
+* Limpieza general de código
+* Validación final de timeouts y manejo de errores
+
+Resultado:
+
+* Capa de validación completamente testeada
+* Endpoints `/play` estables
+* Arquitectura preparada para frontend
+* Backend listo para release v1.0.0
 
 ### Día 13
 
@@ -474,22 +519,23 @@ Alcance:
 ## 📌 Estado Actual
 
 ```text
-Estado: 🟢 En desarrollo
-Última fase: Día 12 – Tests unitarios y de integración (EN PROGRESO)
+Estado: 🟢 Estable – Backend listo para frontend
+Última fase: Día 12 – Tests unitarios e integración (en progreso)
 
-Avances:
-- Corrección de validación de streams en episodios de series ✅
-- Segmentación del catálogo por categoría directamente en Xtream
-- Implementación de validate_stream como interfaz unificada
-- Validación liviana de VOD y Live mediante HEAD
-- Eliminación de lectura bloqueante de chunks en Live TV
-- Implementación de cache en memoria con TTL configurable por tipo
-- Control de concurrencia mediante asyncio.Semaphore
-- Integración de validación en endpoints /play
-- Protección contra sobrecarga y bloqueos por parte de Xtream
+Avances consolidados:
 
+- Validación de streams robusta con cache y control de concurrencia
+- Integración completa de validate_stream en endpoints /play
+- Corrección de validación en episodios de series
+- Tests unitarios completos para stream_validator
+- Tests de integración para endpoints de reproducción
+- Eliminación de uso de eventos deprecados en FastAPI
 
-Próximo paso: seguir con Día 12 (tests)
+Próximo paso: 
+
+- Completar Día 12 – Tests unitarios e integración de mappers Live, Movies y Series
+- Validar normalización de títulos y estabilidad de streams
+- Preparar consolidación para release v1.0.0 (Día 13)
 ```
 
 ---

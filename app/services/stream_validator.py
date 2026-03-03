@@ -88,7 +88,7 @@ async def _check_live(url: str) -> bool:
 
 
 # -------------------------
-# FUNCIÓN PÚBLICA ÚNICA
+# BACKGROUND REVALIDATION
 # -------------------------
 
 async def _background_revalidate(key: str, stream_type: str, url: str):
@@ -106,39 +106,52 @@ async def _background_revalidate(key: str, stream_type: str, url: str):
     finally:
         _pending_revalidations.discard(key)
 
+
+# -------------------------
+# FUNCIÓN PÚBLICA ÚNICA
+# -------------------------
+
 async def validate_stream(stream_type: str, stream_id: int, url: str) -> bool:
     key = _cache_key(stream_type, stream_id)
 
     entry = _stream_cache.get(key)
 
-    # 1️⃣ No existe cache
+    # 1️⃣ CACHE MISS
     if not entry:
-        async with _validation_semaphore:
 
-            if stream_type == "live":
-                is_valid = await _check_live(url)
-            else:
-                is_valid = await _check_vod(url)
+        # Si ya hay validación en curso, esperar resultado
+        if key in _pending_revalidations:
+            while key in _pending_revalidations:
+                await asyncio.sleep(0.01)
+            return _stream_cache[key]["valid"]
 
-            _stream_cache[key] = {
-                "valid": is_valid,
-                "checked_at": time.time()
-            }
+        _pending_revalidations.add(key)
 
-            return is_valid
+        try:
+            async with _validation_semaphore:
+                if stream_type == "live":
+                    is_valid = await _check_live(url)
+                else:
+                    is_valid = await _check_vod(url)
 
-    # 2️⃣ Cache válido dentro de TTL dinámico
+                _stream_cache[key] = {
+                    "valid": is_valid,
+                    "checked_at": time.time()
+                }
+
+                return is_valid
+        finally:
+            _pending_revalidations.discard(key)
+
+    # 2️⃣ CACHE VÁLIDO
     if _cache_valid(entry, stream_type):
         return entry["valid"]
 
-    # 3️⃣ Cache expirado → Stale-While-Revalidate
-
-    # Lanzar revalidación si no está en curso
+    # 3️⃣ CACHE EXPIRADO → Stale-While-Revalidate
     if key not in _pending_revalidations:
         _pending_revalidations.add(key)
         asyncio.create_task(
             _background_revalidate(key, stream_type, url)
         )
 
-    # Retornar valor viejo inmediatamente
     return entry["valid"]

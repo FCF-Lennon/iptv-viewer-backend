@@ -3,7 +3,7 @@ import logging
 from typing import Any, Optional, List, Dict
 from app.core.config import setting
 from app.schemas.xtream import RawLiveSchema, CategorySchema, RawMovieSchema, RawSeriesSchema
-from app.utils.text_cleaner import remove_emojis, normalize_whitespace
+from app.utils.text_cleaner import remove_emojis, normalize_whitespace, clean_category_name
 
 
 logger = logging.getLogger(__name__)
@@ -117,7 +117,7 @@ class XtreamClient:
         
         extra = {"category_id": category_id} if category_id else None
         data = await self._get("get_live_streams", extra)
-        
+
         if not data:
             return []
         
@@ -179,6 +179,7 @@ class XtreamClient:
     
     async def get_live_categories(self) -> List[CategorySchema]:
         data = await self._get("get_live_categories")
+        print(f"2. Petición terminada. Datos recibidos: {len(data) if data else 0} items")
         if not data:
             return []
 
@@ -189,7 +190,7 @@ class XtreamClient:
                 continue
 
             raw_name = item.get("category_name") or ""
-            clean_name = normalize_whitespace(remove_emojis(raw_name))
+            clean_name = normalize_whitespace(clean_category_name(raw_name))
 
             categories.append(
                 CategorySchema(

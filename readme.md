@@ -166,11 +166,13 @@ backend/
 │   │   └── text_cleaner.py
 ├── tests/
 │   ├── unit/
-│   │   └── test_stream_validator.py
+│   │   ├── test_stream_validator.py
+│   │   └── test_live_mapper.py
 │   ├── integration/
 │   │   └── test_play_endpoints.py
-│   ├── fixtures/       # carpeta vacía por ahora
-│   └── test_stream.py  
+│   ├── fixtures/       
+│   ├── test_stream.py  
+│   └── conftest.py  
 ├── pytest.ini
 ├── requirements.txt
 ├── .env.example
@@ -357,7 +359,7 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 * Generación de JWT Firmado
 * Configuración de JWT_SECRET
 * Integración de seguridad con passlib + bcrypt
-* Protección de rutas mediante OAuth2PasswordBearer y get_current_use
+* Protección de rutas mediante OAuth2PasswordBearer y get_current_user
 * Ajuste de Swagger para probar rutas protegidas
 * /auth/token solo para pruebas, producción usa /auth/login
 
@@ -455,7 +457,7 @@ Resultado:
 * Backend protegido ante validaciones masivas
 * Reducción de riesgo de bloqueo por parte del proveedor Xtream
 
-### Día 12
+### Día 12 (En Progreso)
 
 Objetivo: 
 
@@ -503,12 +505,72 @@ Refactor técnico:
 * Limpieza general de código
 * Validación final de timeouts y manejo de errores
 
+---
+
+### Refactor de limpieza de datos IPTV (`text_cleaner`)
+
+Se refactorizó el módulo `text_cleaner.py` para mejorar la normalización de títulos provenientes de proveedores IPTV.
+
+Problemas detectados en listas reales:
+
+* Superíndices Unicode (`¹`, `²`, `³`)
+* Símbolos residuales (`*`, `|`, `-`)
+* Calidad mezclada con el nombre del canal (`HD`, `SD`, `FHD`, `4K`)
+* Sufijos técnicos o marcas de proveedor
+
+Mejoras implementadas:
+
+* Eliminación de caracteres Unicode no deseados
+* Limpieza consistente de símbolos
+* Normalización de espacios y separadores
+* Mejora en extracción de calidad
+* Normalización de títulos antes de ser procesados por los mappers
+
 Resultado:
 
-* Capa de validación completamente testeada
-* Endpoints `/play` estables
-* Arquitectura preparada para frontend
-* Backend listo para release v1.0.0
+* Títulos más consistentes
+* Mejor identificación de canales
+* Datos más estables para consumo del frontend
+
+---
+
+### Tests de normalización de Live TV
+
+Se iniciaron los **tests unitarios para los mappers**, comenzando por `live_mapper`.
+
+Tests implementados:
+
+* `test_live_mapper_normalization`
+* `test_live_mapper_country_detection`
+* `test_live_mapper_requires_stream_id`
+* `test_live_mapper_title_fallback`
+* `test_live_mapper_country_without_spaces`
+* `test_live_mapper_handles_missing_logo`
+* `test_live_mapper_handles_missing_optional_fields`
+
+Cobertura lograda:
+
+* Normalización de títulos
+* Detección de país
+* Manejo de caracteres extraños
+* Manejo de datos faltantes
+* Validación de `stream_id` obligatorio
+
+Resultado:
+
+* `live_mapper` validado contra múltiples formatos reales de listas IPTV
+* Base preparada para continuar con:
+  * `movie_mapper`
+  * `series_mapper`
+
+---
+
+Resultado del Día:
+
+* Validación de streams completamente testeada
+* Limpieza de títulos mejorada
+* Primer mapper cubierto con tests unitarios
+* Backend más robusto frente a datos inconsistentes de Xtream
 
 ### Día 13
 
@@ -522,20 +584,21 @@ Resultado:
 Estado: 🟢 Estable – Backend listo para frontend
 Última fase: Día 12 – Tests unitarios e integración (en progreso)
 
-Avances consolidados:
+Avances recientes:
 
-- Validación de streams robusta con cache y control de concurrencia
-- Integración completa de validate_stream en endpoints /play
-- Corrección de validación en episodios de series
-- Tests unitarios completos para stream_validator
-- Tests de integración para endpoints de reproducción
-- Eliminación de uso de eventos deprecados en FastAPI
+- Refactor completo de text_cleaner para catálogos IPTV reales
+- Implementación robusta de normalize_live()
+- Detección automática de prefijos de país
+- Limpieza avanzada de sufijos IPTV
+- Creación de test_live_mapper.py
+- Cobertura de casos edge comunes en listas IPTV
 
-Próximo paso: 
+Próximo paso:
 
-- Completar Día 12 – Tests unitarios e integración de mappers Live, Movies y Series
-- Validar normalización de títulos y estabilidad de streams
-- Preparar consolidación para release v1.0.0 (Día 13)
+- Tests unitarios para movie_mapper
+- Tests unitarios para series_mapper
+- Consolidación final de la capa de normalización
+- Preparación para release v1.0.0 (Día 13)
 ```
 
 ---
@@ -550,3 +613,4 @@ Cualquier cambio importante en arquitectura, stack o flujo **debe reflejarse aqu
 ✍️ Proyecto desarrollado como práctica profesional de backend y arquitectura web.
 
 ```
+

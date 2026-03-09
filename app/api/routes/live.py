@@ -28,8 +28,17 @@ async def get_live_categories(current_user: str = Depends(get_current_user), lim
 async def get_live_streams(current_user: str = Depends(get_current_user), limit: int = 50, category_id: Optional[str] = None):
     client = XtreamClient()
     try:
-        raw_objects = await client.get_live_tv(category_id=category_id)
-        return [normalize_live(obj.model_dump()) for obj in raw_objects]
+        print("A → llamando get_live_tv")
+
+        raw_objects = await client.get_live_tv(limit=limit, category_id=category_id)
+
+        print("B → recibidos objetos:", len(raw_objects))
+
+        normalized = [normalize_live(obj.model_dump()) for obj in raw_objects]
+
+        print("C → normalización terminada")
+
+        return normalized
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error obteniendo canales: {str(e)}")
     finally:

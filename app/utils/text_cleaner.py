@@ -44,11 +44,11 @@ def normalize_whitespace(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 def extract_year(text: str):
-    match = re.search(r"\((\d{4})\)", text)
-    return int(match.group(1)) if match else None
+    match = re.search(r"\(?\b(19|20)\d{2}\b\)?", text)
+    return int(match.group(0).strip("()")) if match else None
 
 def remove_year(text: str):
-    return re.sub(r"\(\d{4}\)", "", text)
+    return re.sub(r"[\(\[\- ]?(19|20)\d{2}[\)\]]?", "", text)
 
 def safe_float(value):
     try:

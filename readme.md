@@ -167,7 +167,8 @@ backend/
 ├── tests/
 │   ├── unit/
 │   │   ├── test_stream_validator.py
-│   │   └── test_live_mapper.py
+│   │   ├── test_live_mapper.py
+│   │   └── test_movie_mapper.py
 │   ├── integration/
 │   │   └── test_play_endpoints.py
 │   ├── fixtures/       
@@ -563,13 +564,47 @@ Resultado:
   * `movie_mapper`
   * `series_mapper`
 
+### Tests de normalización de películas (`movie_mapper`)
+
+Se añadieron **tests unitarios específicos para la normalización de películas**.
+
+Tests implementados:
+
+* `test_movie_mapper_basic_normalization`
+* `test_movie_mapper_requires_stream_id`
+* `test_movie_mapper_removes_emojis`
+* `test_movie_mapper_invalid_rating`
+* `test_movie_mapper_handles_missing_poster`
+* `test_movie_mapper_preserves_category`
+* `test_movie_mapper_handles_missing_category`
+* `test_movie_mapper_without_year`
+* `test_movie_mapper_whitespace_cleanup`
+
+Cobertura lograda:
+
+* Normalización completa del objeto película
+* Conversión de `stream_id → id`
+* Limpieza de títulos IPTV (espacios, emojis, símbolos)
+* Extracción segura de año desde el título
+* Conversión segura de `rating` a float
+* Manejo de ratings corruptos
+* Manejo de ausencia de `poster`
+* Manejo de ausencia de `category_id`
+* Validación de `stream_id` obligatorio
+
+Resultado:
+
+* `movie_mapper` validado contra múltiples inconsistencias reales de catálogos IPTV
+* Datos normalizados antes de llegar al frontend
+* Prevención de errores provenientes del proveedor Xtream
+
 ---
 
 Resultado del Día:
 
 * Validación de streams completamente testeada
 * Limpieza de títulos mejorada
-* Primer mapper cubierto con tests unitarios
+* `live_mapper` y `movie_mapper` cubiertos con tests unitarios
 * Backend más robusto frente a datos inconsistentes de Xtream
 
 ### Día 13
@@ -591,12 +626,14 @@ Avances recientes:
 - Detección automática de prefijos de país
 - Limpieza avanzada de sufijos IPTV
 - Creación de test_live_mapper.py
+- Creación de test_movie_mapper.py (9 tests unitarios)
 - Cobertura de casos edge comunes en listas IPTV
+- Validación de normalización de películas frente a datos inconsistentes de Xtream
 
 Próximo paso:
 
-- Tests unitarios para movie_mapper
-- Tests unitarios para series_mapper
+- Tests unitarios para series_mapper (temporadas y episodios)
+- Tests para categorías en xtream_client
 - Consolidación final de la capa de normalización
 - Preparación para release v1.0.0 (Día 13)
 ```

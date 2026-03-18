@@ -65,6 +65,8 @@ def normalize_series_detail(raw: dict, series_id: int) -> dict:
                 "vote_average": safe_float(s.get("vote_average")),
                 "cover": s.get("cover")
             })
+    
+    seasons = sorted(seasons, key=lambda x: x["season_number"])
 
     return {
         "id": series_id,

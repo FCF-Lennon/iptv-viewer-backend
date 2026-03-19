@@ -220,3 +220,53 @@ Qué estamos validando?:
 ✔ respuesta consistente
 ✔ no rompe el cliente
 """
+
+def test_series_detail_ignores_empty_seasons():
+    raw = {
+        "info": {"name": "Test"},
+        "seasons": [
+            {"season_number": 1},
+            {"season_number": 2}
+        ],
+        "episodes": {
+            "1": []  # vacía
+        }
+    }
+
+    result = normalize_series_detail(raw, 1)
+
+    assert result["seasons"] == []
+
+""" 
+Qué valida:
+
+✔ No se agregan temporadas vacías
+✔ Evita ruido en frontend
+✔ Protege contra datos basura de Xtream 
+"""
+
+def test_series_detail_handles_missing_episode_number():
+    raw = {
+        "info": {"name": "Test"},
+        "seasons": [{"season_number": 1}],
+        "episodes": {
+            "1": [
+                {"id": 1, "title": "Ep sin numero"}
+            ]
+        }
+    }
+
+    result = normalize_series_detail(raw, 1)
+
+    assert result["seasons"][0]["episodes"][0]["episode_num"] is None
+
+
+"""
+Qué valida:
+
+✔ que el mapper tolere episodios sin campo episode_num provenientes de Xtream
+✔ que safe_int maneje correctamente valores faltantes sin lanzar errores
+✔ que episode_num se establezca como None cuando no existe
+✔ que la estructura de episodios siga siendo válida aunque falten datos
+✔ que el sistema no falle ante inconsistencias en metadata de episodios 
+"""

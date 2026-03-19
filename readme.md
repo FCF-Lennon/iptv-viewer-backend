@@ -601,14 +601,6 @@ Resultado:
 
 ---
 
-Resultado del Día:
-
-* Validación de streams completamente testeada
-* Limpieza de títulos mejorada
-* `live_mapper` y `movie_mapper` cubiertos con tests unitarios
-* Backend más robusto frente a datos inconsistentes de Xtream
-
-
 ### Tests de normalización de series (`series_mapper`)
 
 Se añadieron **tests unitarios para la normalización de series, temporadas y episodio**.
@@ -620,14 +612,16 @@ Tests implementados:
 * `test_series_detail_episode_title_cleanup`
 * `test_series_detail_empty_seasonsg`
 * `test_series_detail_total_episodes_count`
+* `test_series_detail_handles_missing_episode_number`
+* `def test_series_detail_ignores_empty_seasons:`
 
 Cobertura lograda:
 
 * Normalización de títulos de series
 * Extracción de año desde el nombre
 * Limpieza de títulos de episodios (emojis y ruido IPTV)
-* Orden correcto de temporadas
-* Orden correcto de episodios dentro de cada tempodarada
+* Orden correcto de temporadas (`season_number`)
+* Orden correcto de episodios dentro de cada tempodarada (`season_number`)
 * Conteo total de episodios
 * Manejo de estructuras vacías provenientes de Xtream
 
@@ -635,26 +629,20 @@ Corrección aplicada:
 
 * Ordenamiento explícito de temporadas (`season_number`)
 * Prevención de desorden típico en respuestas de Xtream
+* Tolerancia a episodios incompletos (sin número)
 
 Resultado:
 
 * series_mapper validado contra estructuras reales de Xtream
 * Datos consistentes y ordenados para consumo del frontend
 * Eliminación de errores potenciales en UI (temporadas desordenadas)
+* Categorías de series normalizadas correctamente desde `xtream_client`
 
 ---
 
-Resultado del Día:
+### Tests de cliente xtream (`xtream_client`)
 
-* Validación de streams completamente testeada
-* Limpieza de títulos mejorada
-* `live_mapper` y `movie_mapper` cubiertos con tests unitarios
-* Backend más robusto frente a datos inconsistentes de Xtream
-
-
-### Tests de cliente xtream(`xtream_client`)
-
-Se añadieron **tests unitarios para la normalización de categorías de series**.
+Se añadieron **tests unitarios enfocados en la obtención y normalización de categorías de series desde Xtream**.
 
 Tests implementados:
 
@@ -673,6 +661,9 @@ Resultado:
 
 * Categorías normalizadas correctamente
 * Cliente resiliente frente a datos corruptos
+* Limpieza de categorías provenientes de Xtream
+* Manejo de datos inválidos en categorías
+* Manejo de listas vacías en categorías
 * Base lista para consumo por frontend
 
 ---
@@ -685,6 +676,7 @@ Resultado del Día:
 * Tests de categorías de series implementados en `xtream_cliemt`
 * Normalización robusta para movies, live y series validada
 * Orden correcto de temporadas y episodios garantizado
+* Manejo de datos incompletos (ratings, episodios, categorías)
 * Backend más robusto frente a datos inconsistentes de Xtream
 
 
@@ -708,16 +700,20 @@ Avances recientes:
 - Limpieza avanzada de sufijos IPTV
 - Creación de test_live_mapper.py
 - Creación de test_movie_mapper.py (9 tests unitarios)
-- Creación de test_series_mapper.py (tests de temporadas y episodios)
+- Creación de test_series_mapper.py (normalización, temporadas, episodios y edge cases)
+- Implementación de tests de categorías de series en xtream_client
 - Cobertura de casos edge comunes en listas IPTV
-- Validación de normalización de películas frente a datos inconsistentes de Xtream
+- Manejo robusto de datos incompletos (episodios sin número, temporadas vacías, categorías inválidas)
+- Validación de normalización de películas, series y live frente a datos inconsistentes de Xtream
+
 
 Próximo paso:
 
 - Edge cases adicionales en live_mapper
-- Tests para categorías en xtream_client
+- Tests base para xtream_client (_get, manejo de errores HTTP, timeouts)
+- Extender tests de categorías a movies y live
 - Consolidación final de la capa de normalización
-- Preparación para release v1.0.0 (Día 13)
+- Preparación para cierre de Día 12 → release v1.0.0 (Día 13)
 ```
 
 ---

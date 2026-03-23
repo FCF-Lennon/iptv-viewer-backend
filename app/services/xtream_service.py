@@ -54,6 +54,10 @@ class XtreamClient:
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error {e.response.status_code}: {e.response.text}")
             return None
+        
+        except ValueError as e:
+            logger.error(f"Error al analizar la respuesta JSON: {e}")
+            return None
 
 
     async def get_movies(self, limit: int = 50, category_id: Optional[str] = None) -> List[RawMovieSchema]:

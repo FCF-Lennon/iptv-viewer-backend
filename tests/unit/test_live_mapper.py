@@ -175,3 +175,45 @@ Qué valida
 ✔ protege contra proveedores IPTV inconsistentes
 ✔ asegura que el objeto mínimo se puede construir. 
 """
+
+def test_live_mapper_handles_empty_name():
+    raw = {
+        "stream_id": 40,
+        "name": "",
+        "stream_icon": "logo.png",
+    }
+
+    result = normalize_live(raw)
+
+    assert result.title is not None
+    assert result.title != ""
+
+"""
+✔ que el mapper maneje nombres vacíos sin romper
+✔ que nunca retorne título vacío, sino None
+✔ protección contra datos inexistentes del proveedor
+✔ evita romper el frontend (render vacío)
+"""
+
+
+def test_live_mapper_extracts_quality_in_weird_positions():
+
+    raw = {
+        "stream_id": 41,
+        "name": "CL | ESPN HD PREMIUM",
+        "stream_icon": "logo.png"
+    }
+
+    result = normalize_live(raw)
+
+    assert result.quality == "HD"
+    assert "HD" not in result.title
+
+"""
+Qué estamos validando?:
+
+✔ extracción de calidad en posiciones no estándar
+✔ que la calidad no contamine el título final
+✔ robustez frente a formatos IPTV no uniformes
+✔ limpieza correcta de metadatos embebidos
+"""

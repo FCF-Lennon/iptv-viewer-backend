@@ -39,9 +39,14 @@ def normalize_live(item: dict) -> ContentItemSchema:
     if not cleaned_title:
         cleaned_title = raw_title.strip()
 
+    if not cleaned_title:
+        cleaned_title = "Unknown Channel"
+
+    cleaned_title = cleaned_title.upper()
+
     return ContentItemSchema(
         id=safe_int(stream_id),
-        title=cleaned_title.upper(),
+        title=cleaned_title,
         type="live",
         description=None,
         year=None,

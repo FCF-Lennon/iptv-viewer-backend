@@ -169,7 +169,8 @@ backend/
 │   │   ├── test_stream_validator.py
 │   │   ├── test_live_mapper.py
 │   │   ├── test_movie_mapper.py
-│   │   └── test_series_mapper.py
+│   │   ├── test_series_mapper.py
+│   │   └── test_xtream_client.py
 │   ├── integration/
 │   │   └── test_play_endpoints.py
 │   ├── fixtures/       
@@ -542,28 +543,31 @@ Se iniciaron los **tests unitarios para los mappers**, comenzando por `live_mapp
 
 Tests implementados:
 
-* `test_live_mapper_normalization`
+* `test_live_mapper_dirty_titles`
 * `test_live_mapper_country_detection`
 * `test_live_mapper_requires_stream_id`
 * `test_live_mapper_title_fallback`
 * `test_live_mapper_country_without_spaces`
 * `test_live_mapper_handles_missing_logo`
 * `test_live_mapper_handles_missing_optional_fields`
+* `test_live_mapper_handles_empty_name`
+* `test_live_mapper_extracts_quality_in_weird_positions`
 
 Cobertura lograda:
 
-* Normalización de títulos
-* Detección de país
-* Manejo de caracteres extraños
-* Manejo de datos faltantes
+* Limpieza de títulos ofuscados y corryptos (IPTV real)
+* Detección de país desde prefijos (CL |, AR |, etc)
+* Extracción de calidad (HD, SD, etc)
+* Normalización de títulos finales
+* Manejor de datos faltantes(logo, category_id)
 * Validación de `stream_id` obligatorio
+* Protección contra títulos vacíos o inválidos
 
 Resultado:
 
 * `live_mapper` validado contra múltiples formatos reales de listas IPTV
-* Base preparada para continuar con:
-  * `movie_mapper`
-  * `series_mapper`
+* Datos limpios y consistentes para consumo del frontend
+* Mayor resiliencia frente a datos corruptos del proveedor
 
 ### Tests de normalización de películas (`movie_mapper`)
 
@@ -610,7 +614,7 @@ Tests implementados:
 * `test_series_mapper_basic`
 * `test_series_detail_seasons_and_episodes_sorted`
 * `test_series_detail_episode_title_cleanup`
-* `test_series_detail_empty_seasonsg`
+* `test_series_detail_empty_seasons`
 * `test_series_detail_total_episodes_count`
 * `test_series_detail_handles_missing_episode_number`
 * `def test_series_detail_ignores_empty_seasons:`
@@ -624,59 +628,63 @@ Cobertura lograda:
 * Orden correcto de episodios dentro de cada tempodarada (`season_number`)
 * Conteo total de episodios
 * Manejo de estructuras vacías provenientes de Xtream
+* Manejo de episodios sin `episode_num`
 
 Corrección aplicada:
 
 * Ordenamiento explícito de temporadas (`season_number`)
 * Prevención de desorden típico en respuestas de Xtream
-* Tolerancia a episodios incompletos (sin número)
 
 Resultado:
 
 * series_mapper validado contra estructuras reales de Xtream
 * Datos consistentes y ordenados para consumo del frontend
 * Eliminación de errores potenciales en UI (temporadas desordenadas)
-* Categorías de series normalizadas correctamente desde `xtream_client`
 
 ---
 
-### Tests de cliente xtream (`xtream_client`)
 
-Se añadieron **tests unitarios enfocados en la obtención y normalización de categorías de series desde Xtream**.
+### Tests de cliente Xtream (`xtream_client`)
+
+Se añadieron **tests unitarios para el método `_get` del cliente Xtream**.
 
 Tests implementados:
 
-* `test_series_categories_basic`
-* `test_series_categories_invalid_data`
-* `test_series_categories_empty`
+* `test_get_success`
+* `test_get_http_error`
+* `test_get_timeout`
+* `test_get_invalid_json`
+* `test_get_api_error_field`
+* `test_get_with_extra_params`
+* `test_get_empty_response`
 
 Cobertura lograda:
 
-* limpieza de nombres de categorías (emojis y texto IPTV)
-* Manejo de datos inválidos provenientes de Xtream
-* Manejo de listas vacías
-* Robustez ante respuestas inconsistentes del proveedor
+* Manejo de errores HTTP
+* Manejo de timeouts
+* Protección ante JSON inválido
+* Detección de errores lógicos en respuesta (`"error"`)
+* Envío correcto de parámetros adicionales (`category_id`)
+* Manejo de respuestas vacías `{}` como válidas
 
 Resultado:
 
-* Categorías normalizadas correctamente
-* Cliente resiliente frente a datos corruptos
-* Limpieza de categorías provenientes de Xtream
-* Manejo de datos inválidos en categorías
-* Manejo de listas vacías en categorías
-* Base lista para consumo por frontend
+* Cliente Xtream resiliente ante fallos reales
+* Diferenciación clara entre error (`None`) y respuesta válida vacía (`{}`)
+* Base sólida para consumo seguro desde servicios web
 
 ---
 
 Resultado del Día:
 
 * Validación de streams completamente testeada
-* Limpieza de títulos mejorada (text_cleanner refactor)
+* Limpieza de títulos mejorada (`text_cleaner` refactor)
 * `live_mapper`, `movie_mapper` y `series_mapper` cubiertos con tests unitarios
-* Tests de categorías de series implementados en `xtream_cliemt`
+* `xtream_client` completamente testeado (método `_get`)
 * Normalización robusta para movies, live y series validada
+* Manejo robusto de errores HTTP, timeout y respuestas inválidas
+* Manejo correcto de respuestas vacías {} en cliente Xtream
 * Orden correcto de temporadas y episodios garantizado
-* Manejo de datos incompletos (ratings, episodios, categorías)
 * Backend más robusto frente a datos inconsistentes de Xtream
 
 
@@ -690,30 +698,21 @@ Resultado del Día:
 
 ```text
 Estado: 🟢 Estable – Backend listo para frontend
-Última fase: Día 12 – Tests unitarios e integración (en progreso)
+Última fase: Día 12 – Tests unitarios e integración (COMPLETADO)
 
 Avances recientes:
 
 - Refactor completo de text_cleaner para catálogos IPTV reales
 - Implementación robusta de normalize_live()
-- Detección automática de prefijos de país
-- Limpieza avanzada de sufijos IPTV
-- Creación de test_live_mapper.py
-- Creación de test_movie_mapper.py (9 tests unitarios)
-- Creación de test_series_mapper.py (normalización, temporadas, episodios y edge cases)
-- Implementación de tests de categorías de series en xtream_client
+- Tests completos en live_mapper
+- Tests completos en xtream_client
 - Cobertura de casos edge comunes en listas IPTV
-- Manejo robusto de datos incompletos (episodios sin número, temporadas vacías, categorías inválidas)
-- Validación de normalización de películas, series y live frente a datos inconsistentes de Xtream
-
+- Validación robusta frente a datos inconsistentes de Xtream
 
 Próximo paso:
 
-- Edge cases adicionales en live_mapper
-- Tests base para xtream_client (_get, manejo de errores HTTP, timeouts)
-- Extender tests de categorías a movies y live
-- Consolidación final de la capa de normalización
-- Preparación para cierre de Día 12 → release v1.0.0 (Día 13)
+- Release v1.0.0 (Día 13)
+
 ```
 
 ---

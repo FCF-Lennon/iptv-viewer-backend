@@ -1,12 +1,12 @@
 from pydantic import BaseModel, ConfigDict
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 class RawMovieSchema(BaseModel):
-    stream_id: Optional[Union[int, str]] = None  # acepta int o str
+    stream_id: Optional[Union[int, str]] = None  
     name: Optional[str] = None
     category_id: Optional[str] = None
     stream_icon: Optional[str] = None
-    rating: Optional[Union[float, str]] = None  # acepta float o str
+    rating: Optional[Union[float, str]] = None  
     added: Optional[str] = None
     container_extension: Optional[str] = None
     is_adult: Optional[str] = None

@@ -4,8 +4,8 @@ from typing import Optional, List
 class ContentItemSchema(BaseModel):
     id: int
     title: str
-    type: str  # movie | series | live tv
-    description: Optional[str] = None  # <- aquí está
+    type: str 
+    description: Optional[str] = None  
     year: Optional[int] = None
     poster: Optional[str] = None
     category: Optional[str] = None

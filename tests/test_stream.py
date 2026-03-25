@@ -1,6 +1,5 @@
 import pytest
 from app.services.xtream_service import XtreamClient
-from typing import Optional
 
 @pytest.mark.asyncio
 async def test_movies_api():

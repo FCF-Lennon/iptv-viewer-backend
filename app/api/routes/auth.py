@@ -5,7 +5,7 @@ from app.db.session import SessionLocal
 from app.models.user import User
 from app.schemas.auth import UserCreate, UserLogin, Token
 from app.core.security import hasH_password, verify_password, create_access_token
-from app.core.config import setting  # <-- usamos setting para decidir entorno
+from app.core.config import setting
 
 router = APIRouter(
     prefix="/auth",
@@ -19,8 +19,6 @@ def get_db():
     finally:
         db.close()
 
-
-# Registro de usuario
 @router.post("/register")
 def register(user: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == user.email).first()
@@ -37,9 +35,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     return {"message": "Usuario creado correctamente"}
 
 
-# Login / token según entorno
 if setting.app_env == "development":
-    # Solo para Swagger/dev: /auth/token con OAuth2PasswordRequestForm
     @router.post("/token", response_model=Token)
     def login_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
         db_user = db.query(User).filter(User.email == form_data.username).first()
@@ -49,7 +45,6 @@ if setting.app_env == "development":
         return {"access_token": token, "token_type": "bearer"}
 
 else:
-    # Producción/frontend: /auth/login con JSON
     @router.post("/login", response_model=Token)
     def login(user: UserLogin, db: Session = Depends(get_db)):
         db_user = db.query(User).filter(User.email == user.email).first()

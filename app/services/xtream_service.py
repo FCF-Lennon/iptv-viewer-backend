@@ -40,12 +40,11 @@ class XtreamClient:
 
             data = response.json()
 
-            # Solo validamos si la API devuelve error explícito
             if isinstance(data, dict) and "error" in data:
                 logger.warning(f"API devolvió error: {data['error']}")
                 return None
 
-            return data  # ← sin forzar tipo
+            return data 
 
         except httpx.RequestError as e:
             logger.error(f"Error de conexión a Xtream Codes: {e}")
@@ -70,10 +69,8 @@ class XtreamClient:
         if not data:
             return []
 
-        # Aplica límite
         data = data[:limit]
 
-        # Convierte a RawMovieSchema
         return [
             RawMovieSchema.model_validate(item)
             for item in data
@@ -99,10 +96,8 @@ class XtreamClient:
         if not data:
             return []
 
-        # Aplica límite
         data = data[:limit]
 
-        # Convierte a RawSeriesSchema
         return [
             RawSeriesSchema.model_validate(item)
             for item in data

@@ -63,7 +63,6 @@ async def get_episode_play_url(series_id: int, episode_id: int, current_user: st
         if not series_data:
             raise HTTPException(status_code=404, detail="Serie no encontrada")
 
-        # Buscar el episodio dentro de la serie
         episode_found = None
         for eps_list in series_data.get("episodes", {}).values():
             for ep in eps_list:

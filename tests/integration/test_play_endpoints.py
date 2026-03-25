@@ -6,7 +6,6 @@ from unittest.mock import AsyncMock, patch
 from app.main import app
 from app.core.security import get_current_user
 
-# Override autenticación
 app.dependency_overrides[get_current_user] = lambda: "test_user"
 
 client = TestClient(app)

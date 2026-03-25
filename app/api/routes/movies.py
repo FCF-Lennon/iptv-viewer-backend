@@ -42,7 +42,6 @@ async def get_movies(current_user: str = Depends(get_current_user), limit: int =
 
     try:
         raw_objects = await client.get_movies(limit=limit, category_id=category_id)
-        # Normaliza cada película usando normalize_movie
         normalized = [normalize_movie(obj.model_dump()) for obj in raw_objects]
 
         return normalized

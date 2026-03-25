@@ -63,12 +63,10 @@ def safe_int(value):
         return None
 
 def extract_quality(text: str):
-    # Añadido 265 y H265
     match = re.search(r"\b(FHD|HD|SD|4K|1080[pi]|720[pi]|480[pi]|220[pi]|HEVC|H?265)\b", text, re.IGNORECASE)
     return match.group(1).upper() if match else None
 
 def remove_quality(text: str) -> str:
-    # Añadido 265 y H265
     return re.sub(r"\b(FHD|HD|SD|4K|1080[pi]|720[pi]|480[pi]|220[pi]|HEVC|H?265)\b", "", text, flags=re.IGNORECASE).strip() if text else ""
 
 
@@ -83,19 +81,16 @@ def clean_obfuscation(text: str) -> str:
     text = text.replace('ᶠ', 'F').replace('ᴴ', 'H').replace('ᴰ', 'D').replace('¹', ' 1 ')
     text = re.sub(r'(?i)(?<=[A-Z])(FHD|HD|SD|4K|HEVC)\b', r' \1', text)
     
-    # 1. RESTAURADO: Esta es la línea crucial que quita los asteriscos ANTES de evaluar a ESPN.
-    text = re.sub(r'[*\[\]{}!¡¿?_]', '', text)
-    
     text = re.sub(r'(?i)Ty€', 'TYC', text)
     text = re.sub(r'(?i)C1NEMAX', 'CINEMAX', text)
     text = re.sub(r'(?i)Ŕ3@L M@DRÏD', 'REAL MADRID', text)
     text = re.sub(r'(?i)D[3E]P[OÖØ0]RT[E3]S', 'DEPORTES', text)
     text = re.sub(r'(?i)5PORT5', 'SPORTS', text)
-    text = re.sub(r'(?i)[\$€][ŠS]PN', 'ESPN', text) # Volverá a capturar $SPN y €SPN sin problemas
+    text = re.sub(r'(?i)[\$€][ŠS]PN', 'ESPN', text) 
     text = re.sub(r'(?i)F0X', 'FOX', text)
     text = re.sub(r'(?i)C4N4L', 'CANAL', text)
     text = re.sub(r'(?i)CUZC0', 'CUZCO', text)
-    # Correcciones dirigidas proactivas (Evitando el reemplazo global de números)
+
     text = re.sub(r'(?i)4M[EÉ]R1C4', 'AMERICA', text)
     text = re.sub(r'(?i)4M[EÉ]RICA', 'AMERICA', text)
     text = re.sub(r'(?i)T3L3F[EÉ]', 'TELEFE', text)
@@ -109,21 +104,19 @@ def clean_obfuscation(text: str) -> str:
     for bad, good in leet_map.items():
         text = text.replace(bad, good)
 
-    # 2. LISTA BLANCA: Sigue aquí abajo matando estrellas (✪) y símbolos raros, pero sin romper la lógica.
+    
     text = re.sub(r'[^\w\s\-\(\)/|:=.]', '', text)
     
     text = re.sub(r'(?i)\b(ESPN)(\d+)\b', r'\1 \2', text)
     text = re.sub(r'(?i)\b(ESPN|FOX|HBO|STAR|TNT)\s*(?:\|\||\||=|·)\s*(EXTRA|PREMIUM|DEPORTES|SPORTS|MOVIES|ACTION|FAMILY|COMEDY|SERIES|\d+)\b', r'\1 \2', text)
         
-    
-    # Corrección de duplicaciones típicas después del leet cleaning
     text = re.sub(r'\bSSPORTS\b', 'SPORTS', text, flags=re.IGNORECASE)
     text = re.sub(r'\bSSPN\b', 'ESPN', text, flags=re.IGNORECASE)
 
     return text
 
 def extract_prefix(text: str):
-    # SALVAVIDAS: Si es un partido (contiene " vs "), ignoramos los separadores.
+
     if re.search(r'(?i)\bvs\b', text):
         return None, text
         
@@ -151,7 +144,7 @@ def extract_strict_country(text: str):
     return None
 
 def clean_suffixes_and_noise(text: str) -> str:
-    # 1. OPCIONES: Ahora detecta "OPC 1", "OPC1", "OP 2", etc.
+    
     text = re.sub(r'(?i)\b(OPCION|OPC|OP|OPT)\s*#?\s*\d+\b', '', text)
     
     text = re.sub(r'\((SOLO EVENTOS[^)]*|EXCLUSIVO|OFFLINE|PP|I|OPC[^)]*)\)', '', text, flags=re.IGNORECASE)
@@ -165,18 +158,15 @@ def clean_suffixes_and_noise(text: str) -> str:
     if not re.search(r'(?i)\bvs\b', text):
         text = re.sub(country_pattern, '', text, flags=re.IGNORECASE)
     
-    # 3. PARENTESIS Y 24/7:
-    text = re.sub(r'\(\s+', '(', text) # Elimina espacio después de (
-    text = re.sub(r'\s+\)', ')', text) # Elimina espacio antes de )
-    text = re.sub(r'\(\)', '', text)   # Limpia paréntesis vacíos
-    text = re.sub(r'(?i)\b24\s*7\b', '24/7', text) # Arregla o fuerza "24/7"
+    text = re.sub(r'\(\s+', '(', text) 
+    text = re.sub(r'\s+\)', ')', text) 
+    text = re.sub(r'\(\)', '', text)  
+    text = re.sub(r'(?i)\b24\s*7\b', '24/7', text) 
     
     text = re.sub(r'\bF\b\s*$', '', text, flags=re.IGNORECASE)
     
-    # 4. SÍMBOLOS: Quitamos slashes (/) SOLO si no están entre números (Salva el 24/7)
     text = re.sub(r'(?<!\d)/(?!\d)', ' ', text)
     
-    # 5. GUIONES, PIPES Y ESPACIOS FINALES: Mata el "-" suelto en "ESPN 5 -", o el "|" en "Record News |"
     text = re.sub(r'[\-\s|/:]+$', '', text)
 
     text = re.sub(r'(?<=\D)-(?=\d)', ' ', text)
@@ -188,20 +178,16 @@ def clean_category_name(text: str) -> str:
     if not text:
         return "SIN CLASIFICAR"
     
-    # 1. Usamos tu función original para matar emojis y símbolos extraños primero
     text = remove_emojis(text)
         
-    # 2. Arreglos específicos de marcas sucias (Ej: $PN, $SPN, E.S.P.N, D3PORTES)
     text = re.sub(r'(?i)\bE?[\$€]?[ŠS]PN\b', 'ESPN', text)
     text = re.sub(r'(?i)5PORT5', 'SPORTS', text)
     text = re.sub(r'(?i)D[3E]P[OÖØ0]RT[E3]S', 'DEPORTES', text)
     
-    # 3. Limpieza de Leet-speak
     leet_map = {'$': 'S', 'Š': 'S', 'Ə': 'E', '€': 'E', 'Ö': 'O', 'Ø': 'O', '⚽': 'O', '@': 'A', 'Æ': 'A', 'Ï': 'I'}
     for bad, good in leet_map.items():
         text = text.replace(bad, good)
         
-    # 4. Permitimos recuperar slashes o ampersands si el proveedor los mandó bien
     text = text.replace('_', ' ')
     
     return text.strip()

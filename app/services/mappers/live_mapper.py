@@ -17,9 +17,6 @@ def normalize_live(item: dict) -> ContentItemSchema:
 
     raw_title = item.get("name", "")
 
-    # ==========================================
-    # Extraemos el país del título crudo completo
-    # ==========================================
     strict_country = extract_strict_country(raw_title)
 
     cleaned_title = clean_obfuscation(raw_title)
@@ -31,7 +28,6 @@ def normalize_live(item: dict) -> ContentItemSchema:
     cleaned_title = clean_suffixes_and_noise(cleaned_title)
     cleaned_title = normalize_whitespace(cleaned_title or "")
 
-    # Salvavidas para canales invertidos ("FUT BASIC | HD OP2")
     if not cleaned_title and prefix:
         cleaned_title = clean_suffixes_and_noise(prefix)
         cleaned_title = normalize_whitespace(cleaned_title or "")

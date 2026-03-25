@@ -7,9 +7,6 @@ from app.utils.text_cleaner import (
     normalize_whitespace
 )
 
-# -------------------------
-# Función de normalización
-# -------------------------
 def normalize_movie(item: dict) -> ContentItemSchema:
     stream_id = item.get("stream_id")
     if not stream_id:

@@ -11,9 +11,7 @@ from app.utils.text_cleaner import (
 def normalize_series(item: dict) -> ContentItemSchema:
     raw_title = item.get("name", "") or ""
 
-    # Extraer año usando tu función existente
     year = extract_year(raw_title)
-    # Quitar año y limpiar título en una sola línea
     title = normalize_whitespace(remove_emojis(remove_year(raw_title)))
 
     rating = safe_float(item.get("rating"))
@@ -22,7 +20,7 @@ def normalize_series(item: dict) -> ContentItemSchema:
         id=int(item.get("series_id")),
         title=title,
         type="series",
-        description=None,  # sin descripción
+        description=None, 
         year=year,
         poster=item.get("cover"),
         category=str(item.get("category_id")) if item.get("category_id") else None,
@@ -42,7 +40,6 @@ def normalize_series_detail(raw: dict, series_id: int) -> dict:
         season_number = safe_int(s.get("season_number"))
         season_eps = episodes_raw.get(str(season_number), [])
 
-        # Construir lista de episodios de forma más directa
         episode_list = [
             {
                 "id": safe_int(ep.get("id")),

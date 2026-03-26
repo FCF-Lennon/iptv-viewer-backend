@@ -5,16 +5,15 @@ from app.core.config import setting
 from app.schemas.xtream import RawLiveSchema, CategorySchema, RawMovieSchema, RawSeriesSchema
 from app.utils.text_cleaner import remove_emojis, normalize_whitespace, clean_category_name
 
-
 logger = logging.getLogger(__name__)
 
 class XtreamClient:
     """Cliente para consumir la API de Xtream Codes de manera segura. con cache de episodios."""
 
-    def __init__(self):
-        self.host = setting.xtream_host
-        self.username = setting.xtream_username
-        self.password = setting.xtream_password
+    def __init__(self, host: str, username: str, password: str):
+        self.host = host
+        self.username = username
+        self.password = password
         self.user_agent = setting.xtream_user_agent
 
         self.client = httpx.AsyncClient(

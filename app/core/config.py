@@ -7,9 +7,6 @@ class Settings(BaseSettings):
     database_url: str
     jwt_secret: str
 
-    xtream_host: str
-    xtream_username: str
-    xtream_password: str
     xtream_user_agent: str = "SmartShesPro/1.0"
 
     model_config = SettingsConfigDict(

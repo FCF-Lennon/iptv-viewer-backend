@@ -6,6 +6,9 @@ from app.models.user import User
 from app.schemas.auth import UserCreate, UserLogin, Token
 from app.core.security import hasH_password, verify_password, create_access_token
 from app.core.config import setting  # <-- usamos setting para decidir entorno
+from app.schemas.xtream import XtreamCredentials
+from app.core.security import get_current_user
+from app.core.xtream_store import user_xtream_credentials
 
 router = APIRouter(
     prefix="/auth",
@@ -57,3 +60,11 @@ else:
             raise HTTPException(status_code=401, detail="Credenciales inválidas")
         token = create_access_token({"sub": db_user.email})
         return {"access_token": token, "token_type": "bearer"}
+
+@router.post("/xtream")
+def set_xtream_credentials(
+    creds: XtreamCredentials,
+    email: str = Depends(get_current_user)
+):
+    user_xtream_credentials[email] = creds
+    return {"message": "Credenciales guardadas"}

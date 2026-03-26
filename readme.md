@@ -69,6 +69,7 @@ main        → versión estable / releases
 develop     → integración continua
 feature/*   → desarrollo de funcionalidades
 test/*      → pruebas y fixes (temporales)
+release/*   → preparación de versiones antes de merge a main
 ```
 
 ### Reglas
@@ -137,7 +138,8 @@ backend/
 │   ├── main.py
 │   ├── core/
 │   │   ├── config.py
-│   │   └── security.py
+│   │   ├── security.py
+│   │   └── xtream_store.py
 │   ├── api/
 │   │   └── routes/
 │   │       ├── movies.py
@@ -187,12 +189,11 @@ backend/
 ## 🔐 Variables de Entorno
 
 ```env
-XTREAM_HOST=http://example.com:8080
-XTREAM_USERNAME=user
-XTREAM_PASSWORD=pass
 JWT_SECRET=supersecret
 DATABASE_URL=sqlite:///./iptv.db
 ```
+Las credenciales Xtream ahora se configuran por usuario mediante endpoint protegido.
+`POST /auth/xtream`
 
 ⚠️ El archivo `.env` **no se sube al repositorio**.
 
@@ -243,6 +244,40 @@ POST /auth/login
 El resto de endpoints pueden requerir autenticación.
 
 ---
+
+## 👥 Credenciales Xtream por Usuario
+
+El backend ahora soporta credenciales Xtream independientes por usuario.
+Cada usuario puede configurar su propio proveedor IPTV sin afectar a otros.
+
+Endpoint:
+
+POST /auth/xtream
+
+Body:
+
+{
+  "host": "http://example.com:8080",
+  "username": "user",
+  "password": "pass"
+}
+
+Requiere autenticación JWT.
+
+Flujo:
+
+1. Usuario se registra
+2. Usuario inicia sesión
+3. Usuario configura sus credenciales Xtream
+4. El backend usa esas credenciales en todos los endpoints
+
+Ventajas:
+
+* Multi-usuario real
+* Sin variables globales
+* Cada usuario usa su propio proveedor IPTV
+* Preparado para persistencia futura en base de datos
+
 
 ## 🛡️ Uso responsable de la API Xtream Codes
 
@@ -302,6 +337,7 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 * `POST /auth/login`
 * `POST /auth/register`
+* `POST /auth/xtream`
 
 ---
 
@@ -690,28 +726,100 @@ Resultado del Día:
 
 ### Día 13
 
-* Release v1.0.0
+Objetivo:
+
+* Publicar la primera versión estable del backend
+* Preparar base para soporte multi-usuario Xtream
+
+Alcance:
+
+* Release v1.0.0 (backend single-user)
+* Implementación de credenciales Xtream por usuario en memoria
+* Eliminación de variables globales XTREAM_*
+* Creación de endpoint protegido POST /auth/xtream
+* Asociación de credenciales Xtream al usuario autenticado
+* Ajuste de endpoints movies, series y live para usar credenciales por usuario
+* Validación de credenciales antes de consumir Xtream
+* Backend preparado para arquitectura multi-tenant
+* Implementación inicial sin persistencia (almacenamiento temporal en memoria)
+
+Resultado:
+
+* Backend estable v1.0.0 publicado
+* Soporte multi-usuario Xtream en memoria
+* Eliminación de dependencia de variables globales
+* Arquitectura preparada para persistencia en base de datos
+
+### Día 14
+
+Objetivo:
+
+* Persistir credenciales Xtream por usuario en base de datos
+* Proteger datos sensibles mediante hashing
+
+Alcance:
+
+* Creación de modelo XtreamCredentials
+* Relación 1:1 con User
+* Migración de almacenamiento en memoria a base de datos
+* Hash de password Xtream antes de guardar
+* Ajuste de servicios para leer desde DB
+* Eliminación del almacenamiento en memoria
+* Manejo de credenciales inexistentes
+
+Resultado:
+
+* Credenciales persistentes
+* Mayor seguridad
+* Backend preparado para producción
+
+
+### Día 15
+
+Objetivo:
+
+* Preparar release v1.1.0
+* Completar despliegue en Render
+
+Alcance:
+
+* Configuración variables de entorno producción
+* Ajuste DATABASE_URL para PostgreSQL
+* Validación JWT en producción
+* Pruebas de endpoints desplegados
+* Configuración CORS para frontend
+* Verificación de timeouts Xtream en entorno real
+
+Resultado:
+
+* Backend desplegado en Render
+* Release v1.1.0
+* Backend listo para integración frontend en producción
+
 
 ---
 
 ## 📌 Estado Actual
 
 ```text
-Estado: 🟢 Estable – Backend listo para frontend
-Última fase: Día 12 – Tests unitarios e integración (COMPLETADO)
+Estado: 🟢 Estable – Multi-usuario Xtream (en memoria)
+Última fase: Día 13 – Release v1.0.0 y Credenciales Xtream por usuario (COMPLETADO)
 
 Avances recientes:
 
-- Refactor completo de text_cleaner para catálogos IPTV reales
-- Implementación robusta de normalize_live()
-- Tests completos en live_mapper
-- Tests completos en xtream_client
-- Cobertura de casos edge comunes en listas IPTV
-- Validación robusta frente a datos inconsistentes de Xtream
+- Soporte multi-usuario para credenciales Xtream
+- Eliminación de variables globales XTREAM_*
+- Endpoint protegido POST /auth/xtream
+- Asociación de credenciales por usuario autenticado
+- Backend preparado para multi-tenant
+- Ajuste de endpoints movies, series y live para usar credenciales por usuario
 
-Próximo paso:
+Próximos pasos:
 
-- Release v1.0.0 (Día 13)
+- Persistir credenciales Xtream en base de datos
+- Hash de datos sensibles
+- Release v1.1.0
+- Deploy en Render
 
 ```
 

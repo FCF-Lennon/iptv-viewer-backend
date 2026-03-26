@@ -44,5 +44,8 @@ class CategorySchema(BaseModel):
     category_name: str
 
 
-
+class XtreamCredentials(BaseModel):
+    host: str
+    username: str
+    password: str
 

@@ -148,14 +148,16 @@ backend/
 │   │       └── auth.py
 │   ├── models/
 │   │   ├── favorite.py 
-│   │   └── user.py 
+│   │   ├── user.py 
+│   │   └── xtream_credentials.py
 │   ├── schemas/
 │   │   ├── xtream.py
 │   │   ├── content.py
 │   │   └── auth.py
 │   ├── services/
 │   │   ├── xtream_service.py
-│   │   ├── stream_validator.py      
+│   │   ├── xtream_credentials_service.py
+│   │   ├── stream_validator.py       
 │   │   └── mappers/
 │   │       ├── movie_mapper.py
 │   │       ├── series_mapper.py
@@ -194,6 +196,8 @@ DATABASE_URL=sqlite:///./iptv.db
 ```
 Las credenciales Xtream ahora se configuran por usuario mediante endpoint protegido.
 `POST /auth/xtream`
+
+JWT_SECRET también se utiliza para derivar la clave de cifrado de las credenciales Xtream almacenadas en base de datos.
 
 ⚠️ El archivo `.env` **no se sube al repositorio**.
 
@@ -247,12 +251,13 @@ El resto de endpoints pueden requerir autenticación.
 
 ## 👥 Credenciales Xtream por Usuario
 
-El backend ahora soporta credenciales Xtream independientes por usuario.
+El backend ahora soporta credenciales Xtream por usuario almacenadas en base de datos.
 Cada usuario puede configurar su propio proveedor IPTV sin afectar a otros.
 
 Endpoint:
 
-POST /auth/xtream
+POST /auth/xtream        → guardar credenciales
+GET  /auth/xtream        → obtener credenciales activas
 
 Body:
 
@@ -269,14 +274,26 @@ Flujo:
 1. Usuario se registra
 2. Usuario inicia sesión
 3. Usuario configura sus credenciales Xtream
+4. Las credenciales se almacenan cifradas en base de datos
 4. El backend usa esas credenciales en todos los endpoints
+
+Caracteristicas:
+
+* Persistencia en base de datos
+* Password cifrada con Fernet
+* Soporte multi-tenant real
+* Sin variables globales
+* Soporte múltiples credenciales por usuario
+* Flag `is_active` para seleccionar proveedor activo
+* Timestamp `created_at` en UTC 
 
 Ventajas:
 
 * Multi-usuario real
-* Sin variables globales
-* Cada usuario usa su propio proveedor IPTV
-* Preparado para persistencia futura en base de datos
+* Persistencia segura
+* Preparado para producción
+* Arquitectura escalable
+* Compatible con múltiples proveedores IPTV
 
 
 ## 🛡️ Uso responsable de la API Xtream Codes
@@ -325,7 +342,7 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 * `GET /series/categories`
 * `GET /series`
 * `GET /series/{id}`
-* `GET /series/{id}/play`
+* `GET /series/{series_id}/{episode_id}/play`
 
 ### Live TV ✅
 
@@ -337,7 +354,13 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 * `POST /auth/login`
 * `POST /auth/register`
+
+#### Gestión de credenciales Xtream por usuario ✅
+
 * `POST /auth/xtream`
+* `GET  /auth/xtream`
+* `PATCH /auth/xtream/{id}/active`
+* `DELETE /auth/xtream/{id}`
 
 ---
 
@@ -750,27 +773,41 @@ Resultado:
 * Eliminación de dependencia de variables globales
 * Arquitectura preparada para persistencia en base de datos
 
+
 ### Día 14
 
 Objetivo:
 
 * Persistir credenciales Xtream por usuario en base de datos
-* Proteger datos sensibles mediante hashing
+* Soportar múltiples proveedores IPTV
+* Implementar selección de proveedor activo
 
 Alcance:
 
 * Creación de modelo XtreamCredentials
 * Relación 1:M con User
 * Migración de almacenamiento en memoria a base de datos
-* Hash de password Xtream antes de guardar
+* Cifrado de password Xtream con Fernet
+* Soporte múltiple credenciales por usuario
+* Límite máximo de 5 proveedores por usuario
+* Campo is_active para proveedor activo
+* Timestamp created_at en UTC
+* Servicio xtream_credentials_service
 * Ajuste de servicios para leer desde DB
 * Eliminación del almacenamiento en memoria
 * Manejo de credenciales inexistentes
+* Endpoint crear credencial
+* Endpoint listar credencial
+* Endpoint activar credencial
+* Endpoint eliminar credencial
+* Timestamp `created_at` en UTC
 
 Resultado:
 
-* Credenciales persistentes
-* Mayor seguridad
+* Multi-tenant completo
+* Gestión de múltiples proveedores
+* Selección dinámica de proveedor activo
+* Credenciales persistentes y cifradas
 * Backend preparado para producción
 
 
@@ -802,22 +839,25 @@ Resultado:
 ## 📌 Estado Actual
 
 ```text
-Estado: 🟢 Estable – Multi-usuario Xtream (en memoria)
-Última fase: Día 13 – Release v1.0.0 y Credenciales Xtream por usuario (COMPLETADO)
+Estado: 🟢 Estable – Gestión completa multi-proveedor IPTV
+Última fase: Día 14 – Persistencia de credenciales Xtream (COMPLETADO)
 
 Avances recientes:
 
-- Soporte multi-usuario para credenciales Xtream
-- Eliminación de variables globales XTREAM_*
-- Endpoint protegido POST /auth/xtream
-- Asociación de credenciales por usuario autenticado
-- Backend preparado para multi-tenant
-- Ajuste de endpoints movies, series y live para usar credenciales por usuario
+- Credenciales Xtream persistentes por usuario
+- Cifrado de passwords con Fernet
+- Eliminación completa del almacenamiento en memoria
+- Soporte multi-tenant real
+- Campo is_active para proveedor activo
+- Timestamp created_at en UTC
+- Servicio xtream_credentials_service
+- Inicialización automática mediante init_db
 
 Próximos pasos:
 
-- Persistir credenciales Xtream en base de datos
-- Hash de datos sensibles
+- Configurar despliegue en Render
+- Configurar PostgreSQL producción
+- Agregar CORS para frontend
 - Release v1.1.0
 - Deploy en Render
 

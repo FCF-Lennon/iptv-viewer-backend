@@ -1,13 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional
-
+from sqlalchemy.orm import Session
 from app.services.xtream_service import XtreamClient
 from app.services.stream_validator import validate_stream
 from app.schemas.content import ContentItemSchema, SeriesDetailSchema
 from app.core.config import setting
 from app.core.security import get_current_user
 from app.services.mappers.series_mapper import normalize_series, normalize_series_detail
-from app.core.xtream_store import user_xtream_credentials
+from app.services.xtream_credentials_service import get_active_xtream_credentials_by_email
+from app.db.session import get_db
 
 router = APIRouter(
     prefix="/series",
@@ -15,15 +16,19 @@ router = APIRouter(
 )
 
 @router.get("/categories")
-async def get_series_categories(current_user: str = Depends(get_current_user)):
-    creds = user_xtream_credentials.get(current_user)
+async def get_series_categories(
+    current_user: str = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    creds = get_active_xtream_credentials_by_email(db, current_user)
+
     if not creds:
         raise HTTPException(status_code=400, detail="Credenciales Xtream no configuradas")
 
     client = XtreamClient(
-        creds.host,
-        creds.username,
-        creds.password
+        creds['host'],
+        creds['username'],
+        creds['password']
     )
     try:
         return await client.get_series_categories()
@@ -34,15 +39,20 @@ async def get_series_categories(current_user: str = Depends(get_current_user)):
 
 
 @router.get("/", response_model=List[ContentItemSchema], response_model_exclude_none=True)
-async def get_series(current_user: str = Depends(get_current_user), limit: int = 50, category_id: Optional[str] = None):
-    creds = user_xtream_credentials.get(current_user)
+async def get_series(
+    current_user: str = Depends(get_current_user), 
+    db: Session = Depends(get_db),
+    limit: int = 50, 
+    category_id: Optional[str] = None
+):
+    creds = get_active_xtream_credentials_by_email(db, current_user)
     if not creds:
         raise HTTPException(status_code=400, detail="Credenciales Xtream no configuradas")
 
     client = XtreamClient(
-        creds.host,
-        creds.username,
-        creds.password
+        creds['host'],
+        creds['username'],
+        creds['password']
     )
     try:
         raw_data = await client.get_series(limit=limit, category_id=category_id)
@@ -58,15 +68,19 @@ async def get_series(current_user: str = Depends(get_current_user), limit: int =
 
 
 @router.get("/{series_id}", response_model=SeriesDetailSchema, response_model_exclude_none=True)
-async def get_series_by_id(series_id: int, current_user: str = Depends(get_current_user)):
-    creds = user_xtream_credentials.get(current_user)
+async def get_series_by_id(
+    series_id: int, 
+    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    creds = get_active_xtream_credentials_by_email(db, current_user)
     if not creds:
         raise HTTPException(status_code=400, detail="Credenciales Xtream no configuradas")
 
     client = XtreamClient(
-        creds.host,
-        creds.username,
-        creds.password
+        creds['host'],
+        creds['username'],
+        creds['password']
     )
     try:
         data = await client.get_series_info(series_id)
@@ -81,15 +95,20 @@ async def get_series_by_id(series_id: int, current_user: str = Depends(get_curre
 
 
 @router.get("/{series_id}/{episode_id}/play")
-async def get_episode_play_url(series_id: int, episode_id: int, current_user: str = Depends(get_current_user)):
-    creds = user_xtream_credentials.get(current_user)
+async def get_episode_play_url(
+    series_id: int, 
+    episode_id: int, 
+    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    creds = get_active_xtream_credentials_by_email(db, current_user)
     if not creds:
         raise HTTPException(status_code=400, detail="Credenciales Xtream no configuradas")
 
     client = XtreamClient(
-        creds.host,
-        creds.username,
-        creds.password
+        creds['host'],
+        creds['username'],
+        creds['password']
     )
     try:
         series_data = await client.get_series_info(series_id)
@@ -114,7 +133,7 @@ async def get_episode_play_url(series_id: int, episode_id: int, current_user: st
         if not container_ext:
             raise HTTPException(status_code=400, detail="No se encontró formato de reproducción")
 
-        play_url = f"{creds.host}/series/{creds.username}/{creds.password}/{episode_id}.{container_ext}"
+        play_url = f"{creds['host']}/series/{creds['username']}/{creds['password']}/{episode_id}.{container_ext}"
         
         is_valid = await validate_stream("series", episode_id, play_url)
 

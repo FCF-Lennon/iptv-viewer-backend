@@ -760,7 +760,7 @@ Objetivo:
 Alcance:
 
 * Creación de modelo XtreamCredentials
-* Relación 1:1 con User
+* Relación 1:M con User
 * Migración de almacenamiento en memoria a base de datos
 * Hash de password Xtream antes de guardar
 * Ajuste de servicios para leer desde DB

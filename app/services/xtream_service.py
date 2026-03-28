@@ -22,6 +22,7 @@ class XtreamClient:
         )
 
     async def _get(self, action: str, extra_params: Optional[dict] = None) -> Optional[Any]:
+        
         params = {
             "username": self.username,
             "password": self.password,
@@ -38,7 +39,7 @@ class XtreamClient:
             response.raise_for_status()
 
             data = response.json()
-
+           
             # Solo validamos si la API devuelve error explícito
             if isinstance(data, dict) and "error" in data:
                 logger.warning(f"API devolvió error: {data['error']}")

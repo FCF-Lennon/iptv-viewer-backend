@@ -48,4 +48,6 @@ class XtreamCredentials(BaseModel):
     host: str
     username: str
     password: str
+    name: str
+    is_active: bool = True
 

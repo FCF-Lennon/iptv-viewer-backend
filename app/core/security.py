@@ -1,9 +1,12 @@
+import base64
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
 from app.core.config import setting
+from cryptography.fernet import Fernet
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -45,4 +48,16 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido o expirado",
         )
-    
+
+def get_cipher():
+    key = base64.urlsafe_b64encode(setting.jwt_secret.encode().ljust(32)[:32])
+    return Fernet(key)
+
+def encrypt_password(password: str) -> str:
+    cipher = get_cipher()
+    return cipher.encrypt(password.encode()).decode()
+
+
+def decrypt_password(encrypted: str) -> str:
+    cipher = get_cipher()
+    return cipher.decrypt(encrypted.encode()).decode()

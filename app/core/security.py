@@ -10,13 +10,7 @@ from cryptography.fernet import Fernet
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# URL de token según entorno
-if setting.app_env == "development":
-    token_url = "/auth/token"   # Swagger / dev
-else:
-    token_url = "/auth/login"   # Frontend / prod
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=token_url)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 def hasH_password(password: str):
     return pwd_context.hash(password)

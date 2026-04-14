@@ -31,27 +31,29 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return {"message": "Usuario creado correctamente"}
 
+@router.post("/token", response_model=Token)
+def login_token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+    db_user = db.query(User).filter(User.email == form_data.username).first()
 
-# Login / token según entorno
-if setting.app_env == "development":
-    # Solo para Swagger/dev: /auth/token con OAuth2PasswordRequestForm
-    @router.post("/token", response_model=Token)
-    def login_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-        db_user = db.query(User).filter(User.email == form_data.username).first()
-        if not db_user or not verify_password(form_data.password, db_user.hashed_password):
-            raise HTTPException(status_code=401, detail="Credenciales inválidas")
-        token = create_access_token({"sub": db_user.email})
-        return {"access_token": token, "token_type": "bearer"}
+    if not db_user or not verify_password(form_data.password, db_user.hashed_password):
+        raise HTTPException(status_code=401, detail="Credenciales inválidas")
 
-else:
-    # Producción/frontend: /auth/login con JSON
-    @router.post("/login", response_model=Token)
-    def login(user: UserLogin, db: Session = Depends(get_db)):
-        db_user = db.query(User).filter(User.email == user.email).first()
-        if not db_user or not verify_password(user.password, db_user.hashed_password):
-            raise HTTPException(status_code=401, detail="Credenciales inválidas")
-        token = create_access_token({"sub": db_user.email})
-        return {"access_token": token, "token_type": "bearer"}
+    token = create_access_token({"sub": db_user.email})
+    return {"access_token": token, "token_type": "bearer"}
+
+@router.post("/login", response_model=Token)
+def login(user: UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == user.email).first()
+
+    if not db_user or not verify_password(user.password, db_user.hashed_password):
+        raise HTTPException(status_code=401, detail="Credenciales inválidas")
+
+    token = create_access_token({"sub": db_user.email})
+    return {"access_token": token, "token_type": "bearer"}
+
 
 @router.post("/xtream")
 def set_xtream_credentials(

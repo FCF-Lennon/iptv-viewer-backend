@@ -1,8 +1,9 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     app_name: str 
-    app_env: str = "development"
+    app_env: str = Field(default="development", env="APP_ENV")
     debug: bool = False
     database_url: str
     jwt_secret: str

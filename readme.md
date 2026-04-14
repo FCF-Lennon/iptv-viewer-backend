@@ -203,6 +203,62 @@ JWT_SECRET también se utiliza para derivar la clave de cifrado de las credencia
 
 ---
 
+## 🚀 Ejecución Local
+
+```bash
+git clone https://github.com/FCF-Lennon/iptv-viewer-backend.git
+cd iptv-viewer-backend
+git checkout develop   # o release/v1.1.0 si estás en versión cerrada
+
+cd backend
+
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+pip install -r requirements.txt
+
+cp .env.example .env
+
+uvicorn app.main:app --reload
+
+Swagger:
+http://localhost:8000/docs
+```
+
+## 🌐 Base URL
+
+Local:
+
+```http
+http://localhost:8000
+```
+
+Producción:
+
+```http
+https://iptv-viewer-backend.onrender.com
+```
+
+## 🚀 Deploy
+
+Backend desplegado en:
+
+✔ Render (principal)
+
+## 📡 Consumo desde Frontend
+
+```ts
+const res = await fetch("https://iptv-viewer-backend.onrender.com/movies", {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+});
+
+const data = await res.json();
+```
+
+
 ## 🔐 Autenticación y Seguridad
 
 El backend utiliza autenticación basada en JWT (JSON Web Tokens).
@@ -519,7 +575,7 @@ Resultado:
 * Backend protegido ante validaciones masivas
 * Reducción de riesgo de bloqueo por parte del proveedor Xtream
 
-### Día 12 (En Progreso)
+### Día 12
 
 Objetivo: 
 
@@ -816,50 +872,63 @@ Resultado:
 Objetivo:
 
 * Preparar release v1.1.0
-* Completar despliegue en Render
+* Despliegue completo en producción (Render)
+* Validación de entorno productivo real
 
 Alcance:
 
-* Configuración variables de entorno producción
-* Ajuste DATABASE_URL para PostgreSQL
-* Validación JWT en producción
-* Pruebas de endpoints desplegados
-* Configuración CORS para frontend
-* Verificación de timeouts Xtream en entorno real
+* Configuración de variables de entorno en Render
+* Ajuste de DATABASE_URL para PostgreSQL en producción
+* Validación de conexión a base de datos en entorno cloud
+* Corrección de flujo de autenticación OAuth2 en Swagger
+* Separación estable de endpoints:
+  * `/auth/token` → Swagger OAuth2 (form-data)
+  * `/auth/login` → Frontend (JSON)
+* Fix crítico: eliminación de dependencia de `app_env` en `tokenUrl`
+* Fix crítico: eliminación de dependencia de app_env en tokenUrl
+* Configuración final de CORS para frontend en producción
+* Verificación de compatibilidad con FastAPI + Swagger UI en Render
+* Testing de endpoints críticos en producción
 
 Resultado:
 
-* Backend desplegado en Render
-* Release v1.1.0
-* Backend listo para integración frontend en producción
-
+* Backend desplegado correctamente en Render
+* Swagger UI funcional en producción
+* Autenticación estable en ambos flujos:
+  * Swagger (OAuth2)
+  * Frontend (JWT JSON login)
+* PostgreSQL conectado y operativo en cloud
+* Fix definitivo de error 422 en flujo OAuth
+* Release v1.1.0 validado en entorno real
 
 ---
 
 ## 📌 Estado Actual
 
 ```text
-Estado: 🟢 Estable – Gestión completa multi-proveedor IPTV
-Última fase: Día 14 – Persistencia de credenciales Xtream (COMPLETADO)
+Estado: 🟡 Release v1.1.0 en preparación para producción
+Backend: FastAPI + PostgreSQL (Render)
+Autenticación: JWT + OAuth2 dual (Swagger + Frontend)
+Arquitectura: Multi-tenant IPTV (Xtream por usuario)
 
 Avances recientes:
 
-- Credenciales Xtream persistentes por usuario
-- Cifrado de passwords con Fernet
-- Eliminación completa del almacenamiento en memoria
-- Soporte multi-tenant real
-- Campo is_active para proveedor activo
-- Timestamp created_at en UTC
-- Servicio xtream_credentials_service
-- Inicialización automática mediante init_db
+- Auth estable en dev y prod
+- Swagger funcional en producción
+- Login frontend estable
+- Credenciales Xtream persistentes y cifradas
+- PostgreSQL activo en Render
+- CORS configurado para frontend
 
 Próximos pasos:
 
-- Configurar despliegue en Render
-- Configurar PostgreSQL producción
-- Agregar CORS para frontend
-- Release v1.1.0
-- Deploy en Render
+- Merge a main (producción)
+- Tag v1.1.0
+- Merge release → develop
+- Preparación frontend consumo real
+- Optimización de cache Xtream
+- Logging estructurado (opcional)
+- Tests de integración en CI
 
 ```
 

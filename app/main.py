@@ -13,7 +13,6 @@ from app.db.init_db import init_db
 async def lifespan(app: FastAPI):
     # --- STARTUP ---
     init_db()
-    print("APP_ENV:", setting.app_env)
     
     yield
 

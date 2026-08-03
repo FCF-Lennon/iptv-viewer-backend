@@ -5,7 +5,7 @@ from app.models.user import User
 from app.models.xtream_credentials import XtreamCredentials as XtreamModel
 from app.schemas.xtream import XtreamCredentials
 from app.schemas.auth import UserCreate, UserLogin, Token
-from app.core.security import hasH_password, verify_password, create_access_token
+from app.core.security import hash_password, verify_password, create_access_token
 from app.core.config import setting  
 from app.core.security import get_current_user, encrypt_password
 from app.db.session import get_db
@@ -24,7 +24,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     
     new_user = User(
         email=user.email,
-        hashed_password=hasH_password(user.password)
+        hashed_password=hash_password(user.password)
     )
     db.add(new_user)
     db.commit()

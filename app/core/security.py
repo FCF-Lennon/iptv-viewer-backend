@@ -1,4 +1,3 @@
-import base64
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
@@ -12,7 +11,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
-def hasH_password(password: str):
+def hash_password(password: str):
     return pwd_context.hash(password)
 
 def verify_password(password: str, hashed: str):
@@ -43,9 +42,9 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
             detail="Token inválido o expirado",
         )
 
-def get_cipher():
-    key = base64.urlsafe_b64encode(setting.jwt_secret.encode().ljust(32)[:32])
-    return Fernet(key)
+def get_cipher() -> Fernet:
+    """Devuelve un cipher Fernet usando la clave dedicada (FERNET_KEY en .env)."""
+    return Fernet(setting.fernet_key.encode())
 
 def encrypt_password(password: str) -> str:
     cipher = get_cipher()

@@ -5,7 +5,8 @@ from app.models.user import User
 from app.models.xtream_credentials import XtreamCredentials
 
 def init_db():
-    Base.metadata.create_all(bind=engine)
+    pass
+
 
 
 

@@ -55,6 +55,12 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     return {"access_token": token, "token_type": "bearer"}
 
 
+@router.get("/me")
+def get_me(email: str = Depends(get_current_user)):
+    return {"email": email, "username": email.split('@')[0]}
+
+
+
 @router.post("/xtream")
 def set_xtream_credentials(
     creds: XtreamCredentials,

@@ -20,6 +20,7 @@ class RawSeriesSchema(BaseModel):
     plot: Optional[str] = None
     rating: Optional[Union[str, float]] = None
     category_id: Optional[Union[str, int]] = None
+    last_modified: Optional[str] = None
 
     model_config = ConfigDict(extra="ignore")
 
@@ -50,4 +51,16 @@ class XtreamCredentials(BaseModel):
     password: str
     name: str
     is_active: bool = True
+
+class EpgListingSchema(BaseModel):
+    id: Optional[str] = None
+    epg_id: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    start: Optional[str] = None
+    end: Optional[str] = None
+    start_timestamp: Optional[Union[int, str]] = None
+    stop_timestamp: Optional[Union[int, str]] = None
+
+    model_config = ConfigDict(extra="ignore")
 

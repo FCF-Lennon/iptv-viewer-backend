@@ -3,7 +3,7 @@ import logging
 from typing import Any, Optional, List, Dict
 from app.core.config import setting
 from app.core.http_client import get_http_client
-from app.schemas.xtream import RawLiveSchema, CategorySchema, RawMovieSchema, RawSeriesSchema
+from app.schemas.xtream import RawLiveSchema, CategorySchema, RawMovieSchema, RawSeriesSchema, EpgListingSchema
 from app.utils.text_cleaner import remove_emojis, normalize_whitespace, clean_category_name
 
 logger = logging.getLogger(__name__)
@@ -66,6 +66,9 @@ class XtreamClient:
         if not data:
             return []
 
+        # Ordenar por fecha de agregado (más recientes primero)
+        data.sort(key=lambda x: str(x.get("added", "")), reverse=True)
+
         # Aplica límite
         data = data[:limit]
 
@@ -94,6 +97,9 @@ class XtreamClient:
         data = await self._get("get_series", extra)
         if not data:
             return []
+
+        # Ordenar por fecha de agregado/modificado
+        data.sort(key=lambda x: str(x.get("last_modified") or x.get("added") or ""), reverse=True)
 
         # Aplica límite
         data = data[:limit]
@@ -126,6 +132,19 @@ class XtreamClient:
         return [
             RawLiveSchema.model_validate(item)
             for item in data
+            if isinstance(item, dict)
+        ]
+    
+    async def get_short_epg(self, stream_id: str, limit: int = 5) -> List[EpgListingSchema]:
+        data = await self._get("get_short_epg", {"stream_id": stream_id, "limit": limit})
+        if not data or not isinstance(data, dict):
+            return []
+            
+        epg_listings = data.get("epg_listings", [])
+        
+        return [
+            EpgListingSchema.model_validate(item)
+            for item in epg_listings
             if isinstance(item, dict)
         ]
     

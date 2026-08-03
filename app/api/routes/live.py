@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.services.xtream_service import XtreamClient
-from app.schemas.xtream import CategorySchema
+from app.schemas.xtream import CategorySchema, EpgListingSchema
 from app.schemas.content import ContentItemSchema
 from app.core.security import get_current_user
 from app.services.mappers.live_mapper import normalize_live
@@ -14,6 +14,29 @@ router = APIRouter(
     prefix="/live",
     tags=["live"]
 )
+
+@router.get("/{stream_id}/epg", response_model=List[EpgListingSchema])
+async def get_live_epg(
+    stream_id: str,
+    limit: int = 5,
+    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    creds = get_active_xtream_credentials_by_email(db, current_user)
+    if not creds:
+        raise HTTPException(status_code=400, detail="Credenciales Xtream no configuradas")
+
+    client = XtreamClient(
+        creds["host"],
+        creds["username"],
+        creds["password"]
+    )
+    try:
+        return await client.get_short_epg(stream_id=stream_id, limit=limit)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error obteniendo EPG: {str(e)}")
+    finally:
+        await client.close()
 
 @router.get("/categories", response_model=List[CategorySchema])
 async def get_live_categories(

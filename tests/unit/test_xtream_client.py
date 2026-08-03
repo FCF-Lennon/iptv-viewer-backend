@@ -3,7 +3,7 @@ from app.services.xtream_service import XtreamClient
 
 @pytest.mark.asyncio
 async def test_get_success(monkeypatch):
-    client = XtreamClient()
+    client = XtreamClient(host="http://example.com", username="user", password="pass")
 
     class MockResponse:
         status_code = 200
@@ -35,7 +35,7 @@ import httpx
 
 @pytest.mark.asyncio
 async def test_get_http_error(monkeypatch):
-    client = XtreamClient()
+    client = XtreamClient(host="http://example.com", username="user", password="pass")
 
     async def mock_get(*args, **kwargs):
         raise httpx.HTTPStatusError(
@@ -60,7 +60,7 @@ Qué estamos validando?:
 
 @pytest.mark.asyncio
 async def test_get_timeout(monkeypatch):
-    client = XtreamClient()
+    client = XtreamClient(host="http://example.com", username="user", password="pass")
 
     async def mock_get(*args, **kwargs):
         raise httpx.RequestError("timeout")
@@ -82,7 +82,7 @@ Qué estamos validando?:
 
 @pytest.mark.asyncio
 async def test_get_invalid_json(monkeypatch):
-    client = XtreamClient()
+    client = XtreamClient(host="http://example.com", username="user", password="pass")
 
     class MockResponse:
         status_code = 200
@@ -114,7 +114,7 @@ Qué estamos validando?:
 
 @pytest.mark.asyncio
 async def test_get_api_error_field(monkeypatch):
-    client = XtreamClient()
+    client = XtreamClient(host="http://example.com", username="user", password="pass")
 
     class MockResponse:
         status_code = 200
@@ -146,7 +146,7 @@ Qué estamos validando?:
 
 @pytest.mark.asyncio
 async def test_get_with_extra_params(monkeypatch):
-    client = XtreamClient()
+    client = XtreamClient(host="http://example.com", username="user", password="pass")
 
     captured_params = {}
 
@@ -182,7 +182,7 @@ Qué estamos validando?:
 
 @pytest.mark.asyncio
 async def test_get_empty_response(monkeypatch):
-    client = XtreamClient()
+    client = XtreamClient(host="http://example.com", username="user", password="pass")
 
     class MockResponse:
         status_code = 200

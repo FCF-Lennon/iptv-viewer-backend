@@ -69,6 +69,7 @@ main        → versión estable / releases
 develop     → integración continua
 feature/*   → desarrollo de funcionalidades
 test/*      → pruebas y fixes (temporales)
+release/*   → preparación de versiones antes de merge a main
 ```
 
 ### Reglas
@@ -137,7 +138,8 @@ backend/
 │   ├── main.py
 │   ├── core/
 │   │   ├── config.py
-│   │   └── security.py
+│   │   ├── security.py
+│   │   └── xtream_store.py
 │   ├── api/
 │   │   └── routes/
 │   │       ├── movies.py
@@ -146,14 +148,16 @@ backend/
 │   │       └── auth.py
 │   ├── models/
 │   │   ├── favorite.py 
-│   │   └── user.py 
+│   │   ├── user.py 
+│   │   └── xtream_credentials.py
 │   ├── schemas/
 │   │   ├── xtream.py
 │   │   ├── content.py
 │   │   └── auth.py
 │   ├── services/
 │   │   ├── xtream_service.py
-│   │   ├── stream_validator.py      
+│   │   ├── xtream_credentials_service.py
+│   │   ├── stream_validator.py       
 │   │   └── mappers/
 │   │       ├── movie_mapper.py
 │   │       ├── series_mapper.py
@@ -187,16 +191,73 @@ backend/
 ## 🔐 Variables de Entorno
 
 ```env
-XTREAM_HOST=http://example.com:8080
-XTREAM_USERNAME=user
-XTREAM_PASSWORD=pass
 JWT_SECRET=supersecret
 DATABASE_URL=sqlite:///./iptv.db
 ```
+Las credenciales Xtream ahora se configuran por usuario mediante endpoint protegido.
+`POST /auth/xtream`
+
+JWT_SECRET también se utiliza para derivar la clave de cifrado de las credenciales Xtream almacenadas en base de datos.
 
 ⚠️ El archivo `.env` **no se sube al repositorio**.
 
 ---
+
+## 🚀 Ejecución Local
+
+```bash
+git clone https://github.com/FCF-Lennon/iptv-viewer-backend.git
+cd iptv-viewer-backend
+git checkout develop   # o release/v1.1.0 si estás en versión cerrada
+
+cd backend
+
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+pip install -r requirements.txt
+
+cp .env.example .env
+
+uvicorn app.main:app --reload
+
+Swagger:
+http://localhost:8000/docs
+```
+
+## 🌐 Base URL
+
+Local:
+
+```http
+http://localhost:8000
+```
+
+Producción:
+
+```http
+https://iptv-viewer-backend.onrender.com
+```
+
+## 🚀 Deploy
+
+Backend desplegado en:
+
+✔ Render (principal)
+
+## 📡 Consumo desde Frontend
+
+```ts
+const res = await fetch("https://iptv-viewer-backend.onrender.com/movies", {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+});
+
+const data = await res.json();
+```
+
 
 ## 🔐 Autenticación y Seguridad
 
@@ -244,6 +305,53 @@ El resto de endpoints pueden requerir autenticación.
 
 ---
 
+## 👥 Credenciales Xtream por Usuario
+
+El backend ahora soporta credenciales Xtream por usuario almacenadas en base de datos.
+Cada usuario puede configurar su propio proveedor IPTV sin afectar a otros.
+
+Endpoint:
+
+POST /auth/xtream        → guardar credenciales
+GET  /auth/xtream        → obtener credenciales activas
+
+Body:
+
+{
+  "host": "http://example.com:8080",
+  "username": "user",
+  "password": "pass"
+}
+
+Requiere autenticación JWT.
+
+Flujo:
+
+1. Usuario se registra
+2. Usuario inicia sesión
+3. Usuario configura sus credenciales Xtream
+4. Las credenciales se almacenan cifradas en base de datos
+4. El backend usa esas credenciales en todos los endpoints
+
+Caracteristicas:
+
+* Persistencia en base de datos
+* Password cifrada con Fernet
+* Soporte multi-tenant real
+* Sin variables globales
+* Soporte múltiples credenciales por usuario
+* Flag `is_active` para seleccionar proveedor activo
+* Timestamp `created_at` en UTC 
+
+Ventajas:
+
+* Multi-usuario real
+* Persistencia segura
+* Preparado para producción
+* Arquitectura escalable
+* Compatible con múltiples proveedores IPTV
+
+
 ## 🛡️ Uso responsable de la API Xtream Codes
 
 Xtream Codes **no es una API pública oficial** y puede aplicar bloqueos automáticos ante uso abusivo.
@@ -290,7 +398,7 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 * `GET /series/categories`
 * `GET /series`
 * `GET /series/{id}`
-* `GET /series/{id}/play`
+* `GET /series/{series_id}/{episode_id}/play`
 
 ### Live TV ✅
 
@@ -302,6 +410,13 @@ Estas decisiones son **arquitectónicas** y forman parte del diseño del backend
 
 * `POST /auth/login`
 * `POST /auth/register`
+
+#### Gestión de credenciales Xtream por usuario ✅
+
+* `POST /auth/xtream`
+* `GET  /auth/xtream`
+* `PATCH /auth/xtream/{id}/active`
+* `DELETE /auth/xtream/{id}`
 
 ---
 
@@ -460,7 +575,7 @@ Resultado:
 * Backend protegido ante validaciones masivas
 * Reducción de riesgo de bloqueo por parte del proveedor Xtream
 
-### Día 12 (En Progreso)
+### Día 12
 
 Objetivo: 
 
@@ -690,28 +805,130 @@ Resultado del Día:
 
 ### Día 13
 
-* Release v1.0.0
+Objetivo:
+
+* Publicar la primera versión estable del backend
+* Preparar base para soporte multi-usuario Xtream
+
+Alcance:
+
+* Release v1.0.0 (backend single-user)
+* Implementación de credenciales Xtream por usuario en memoria
+* Eliminación de variables globales XTREAM_*
+* Creación de endpoint protegido POST /auth/xtream
+* Asociación de credenciales Xtream al usuario autenticado
+* Ajuste de endpoints movies, series y live para usar credenciales por usuario
+* Validación de credenciales antes de consumir Xtream
+* Backend preparado para arquitectura multi-tenant
+* Implementación inicial sin persistencia (almacenamiento temporal en memoria)
+
+Resultado:
+
+* Backend estable v1.0.0 publicado
+* Soporte multi-usuario Xtream en memoria
+* Eliminación de dependencia de variables globales
+* Arquitectura preparada para persistencia en base de datos
+
+
+### Día 14
+
+Objetivo:
+
+* Persistir credenciales Xtream por usuario en base de datos
+* Soportar múltiples proveedores IPTV
+* Implementar selección de proveedor activo
+
+Alcance:
+
+* Creación de modelo XtreamCredentials
+* Relación 1:M con User
+* Migración de almacenamiento en memoria a base de datos
+* Cifrado de password Xtream con Fernet
+* Soporte múltiple credenciales por usuario
+* Límite máximo de 5 proveedores por usuario
+* Campo is_active para proveedor activo
+* Timestamp created_at en UTC
+* Servicio xtream_credentials_service
+* Ajuste de servicios para leer desde DB
+* Eliminación del almacenamiento en memoria
+* Manejo de credenciales inexistentes
+* Endpoint crear credencial
+* Endpoint listar credencial
+* Endpoint activar credencial
+* Endpoint eliminar credencial
+* Timestamp `created_at` en UTC
+
+Resultado:
+
+* Multi-tenant completo
+* Gestión de múltiples proveedores
+* Selección dinámica de proveedor activo
+* Credenciales persistentes y cifradas
+* Backend preparado para producción
+
+
+### Día 15
+
+Objetivo:
+
+* Preparar release v1.1.0
+* Despliegue completo en producción (Render)
+* Validación de entorno productivo real
+
+Alcance:
+
+* Configuración de variables de entorno en Render
+* Ajuste de DATABASE_URL para PostgreSQL en producción
+* Validación de conexión a base de datos en entorno cloud
+* Corrección de flujo de autenticación OAuth2 en Swagger
+* Separación estable de endpoints:
+  * `/auth/token` → Swagger OAuth2 (form-data)
+  * `/auth/login` → Frontend (JSON)
+* Fix crítico: eliminación de dependencia de `app_env` en `tokenUrl`
+* Fix crítico: eliminación de dependencia de app_env en tokenUrl
+* Configuración final de CORS para frontend en producción
+* Verificación de compatibilidad con FastAPI + Swagger UI en Render
+* Testing de endpoints críticos en producción
+
+Resultado:
+
+* Backend desplegado correctamente en Render
+* Swagger UI funcional en producción
+* Autenticación estable en ambos flujos:
+  * Swagger (OAuth2)
+  * Frontend (JWT JSON login)
+* PostgreSQL conectado y operativo en cloud
+* Fix definitivo de error 422 en flujo OAuth
+* Release v1.1.0 validado en entorno real
 
 ---
 
 ## 📌 Estado Actual
 
 ```text
-Estado: 🟢 Estable – Backend listo para frontend
-Última fase: Día 12 – Tests unitarios e integración (COMPLETADO)
+Estado: 🟡 Release v1.1.0 en preparación para producción
+Backend: FastAPI + PostgreSQL (Render)
+Autenticación: JWT + OAuth2 dual (Swagger + Frontend)
+Arquitectura: Multi-tenant IPTV (Xtream por usuario)
 
 Avances recientes:
 
-- Refactor completo de text_cleaner para catálogos IPTV reales
-- Implementación robusta de normalize_live()
-- Tests completos en live_mapper
-- Tests completos en xtream_client
-- Cobertura de casos edge comunes en listas IPTV
-- Validación robusta frente a datos inconsistentes de Xtream
+- Auth estable en dev y prod
+- Swagger funcional en producción
+- Login frontend estable
+- Credenciales Xtream persistentes y cifradas
+- PostgreSQL activo en Render
+- CORS configurado para frontend
 
-Próximo paso:
+Próximos pasos:
 
-- Release v1.0.0 (Día 13)
+- Merge a main (producción)
+- Tag v1.1.0
+- Merge release → develop
+- Preparación frontend consumo real
+- Optimización de cache Xtream
+- Logging estructurado (opcional)
+- Tests de integración en CI
 
 ```
 

@@ -154,7 +154,7 @@ Qué estamos validando?:
 @pytest.mark.asyncio
 async def test_series_categories_basic():
 
-    client = XtreamClient()
+    client = XtreamClient(host="http://example.com", username="user", password="pass")
 
     client._get = AsyncMock(return_value=[
         {"category_id": "1", "category_name": "🔥 Acción 🔥"}
@@ -178,7 +178,7 @@ Qué estamos validando?:
 @pytest.mark.asyncio
 async def test_series_categories_invalid_data():
 
-    client = XtreamClient()
+    client = XtreamClient(host="http://example.com", username="user", password="pass")
 
     client._get = AsyncMock(return_value=[
         None,
@@ -204,7 +204,7 @@ Qué estamos validando?:
 @pytest.mark.asyncio
 async def test_series_categories_empty():
 
-    client = XtreamClient()
+    client = XtreamClient(host="http://example.com", username="user", password="pass")
 
     client._get = AsyncMock(return_value=[])
 

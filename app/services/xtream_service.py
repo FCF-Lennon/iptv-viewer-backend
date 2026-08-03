@@ -2,27 +2,23 @@ import httpx
 import logging
 from typing import Any, Optional, List, Dict
 from app.core.config import setting
+from app.core.http_client import get_http_client
 from app.schemas.xtream import RawLiveSchema, CategorySchema, RawMovieSchema, RawSeriesSchema
 from app.utils.text_cleaner import remove_emojis, normalize_whitespace, clean_category_name
-
 
 logger = logging.getLogger(__name__)
 
 class XtreamClient:
     """Cliente para consumir la API de Xtream Codes de manera segura. con cache de episodios."""
 
-    def __init__(self):
-        self.host = setting.xtream_host
-        self.username = setting.xtream_username
-        self.password = setting.xtream_password
-        self.user_agent = setting.xtream_user_agent
-
-        self.client = httpx.AsyncClient(
-            timeout=10.0,
-            headers={"User-Agent": self.user_agent}
-        )
+    def __init__(self, host: str, username: str, password: str):
+        self.host = host
+        self.username = username
+        self.password = password
+        self.client = get_http_client()
 
     async def _get(self, action: str, extra_params: Optional[dict] = None) -> Optional[Any]:
+        
         params = {
             "username": self.username,
             "password": self.password,
@@ -39,12 +35,13 @@ class XtreamClient:
             response.raise_for_status()
 
             data = response.json()
-
+           
+            # Solo validamos si la API devuelve error explícito
             if isinstance(data, dict) and "error" in data:
                 logger.warning(f"API devolvió error: {data['error']}")
                 return None
 
-            return data 
+            return data  # ← sin forzar tipo
 
         except httpx.RequestError as e:
             logger.error(f"Error de conexión a Xtream Codes: {e}")
@@ -69,8 +66,10 @@ class XtreamClient:
         if not data:
             return []
 
+        # Aplica límite
         data = data[:limit]
 
+        # Convierte a RawMovieSchema
         return [
             RawMovieSchema.model_validate(item)
             for item in data
@@ -96,8 +95,10 @@ class XtreamClient:
         if not data:
             return []
 
+        # Aplica límite
         data = data[:limit]
 
+        # Convierte a RawSeriesSchema
         return [
             RawSeriesSchema.model_validate(item)
             for item in data
@@ -178,7 +179,6 @@ class XtreamClient:
     
     async def get_live_categories(self) -> List[CategorySchema]:
         data = await self._get("get_live_categories")
-        print(f"2. Petición terminada. Datos recibidos: {len(data) if data else 0} items")
         if not data:
             return []
 
@@ -201,8 +201,9 @@ class XtreamClient:
         return categories
 
     async def close(self):
-        """Cerrar sesión del cliente HTTP."""
-        await self.client.aclose()
+        """No hace nada, el cliente HTTP es global y se cierra en el lifespan de la app."""
+        pass
+
 
     
     

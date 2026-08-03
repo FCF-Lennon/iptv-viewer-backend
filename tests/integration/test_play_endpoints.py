@@ -8,10 +8,13 @@ from app.core.security import get_current_user
 from app.db.session import get_db
 from app.api.routes.stream import get_stream_user
 
-# Override autenticación y DB
-app.dependency_overrides[get_current_user] = lambda: "test_user"
-app.dependency_overrides[get_stream_user] = lambda: "test_user"
-app.dependency_overrides[get_db] = lambda: None
+@pytest.fixture(autouse=True)
+def override_dependencies():
+    app.dependency_overrides[get_current_user] = lambda: "test_user"
+    app.dependency_overrides[get_stream_user] = lambda: "test_user"
+    app.dependency_overrides[get_db] = lambda: None
+    yield
+    app.dependency_overrides.clear()
 
 client = TestClient(app)
 

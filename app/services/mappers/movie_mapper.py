@@ -17,10 +17,14 @@ def normalize_movie(item: dict) -> ContentItemSchema:
     title = normalize_whitespace(remove_emojis(remove_year(raw_title)))
     
 
+    raw_plot = item.get("plot") or item.get("description")
+    description = normalize_whitespace(remove_emojis(raw_plot)) if raw_plot else None
+
     return ContentItemSchema(
         id=int(stream_id),
         title=title,
         type="movie",
+        description=description,
         year=year,
         poster=item.get("stream_icon"),
         category=item.get("category_id"),

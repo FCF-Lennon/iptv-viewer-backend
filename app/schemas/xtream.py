@@ -10,6 +10,8 @@ class RawMovieSchema(BaseModel):
     added: Optional[str] = None
     container_extension: Optional[str] = None
     is_adult: Optional[str] = None
+    plot: Optional[str] = None
+    description: Optional[str] = None
 
     model_config = ConfigDict(extra="ignore")
  

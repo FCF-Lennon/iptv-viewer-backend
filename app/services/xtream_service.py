@@ -1,3 +1,4 @@
+import base64
 import httpx
 import logging
 from typing import Any, Optional, List, Dict
@@ -134,7 +135,6 @@ class XtreamClient:
             for item in data
             if isinstance(item, dict)
         ]
-    
     async def get_short_epg(self, stream_id: str, limit: int = 5) -> List[EpgListingSchema]:
         data = await self._get("get_short_epg", {"stream_id": stream_id, "limit": limit})
         if not data or not isinstance(data, dict):
@@ -142,11 +142,28 @@ class XtreamClient:
             
         epg_listings = data.get("epg_listings", [])
         
-        return [
-            EpgListingSchema.model_validate(item)
-            for item in epg_listings
-            if isinstance(item, dict)
-        ]
+        parsed_listings = []
+        for item in epg_listings:
+            if not isinstance(item, dict):
+                continue
+            
+            # Decodificar título y descripción si vienen en base64
+            for field in ["title", "description"]:
+                val = item.get(field)
+                if val and isinstance(val, str):
+                    try:
+                        # Intentar decodificar si es base64
+                        decoded_bytes = base64.b64decode(val + "===")
+                        decoded_str = decoded_bytes.decode("utf-8")
+                        # Si la cadena decodificada tiene sentido (no es puro ruido), la usamos
+                        if len(decoded_str) > 0 and decoded_str.isprintable():
+                            item[field] = decoded_str
+                    except Exception:
+                        pass # No es base64 o no se pudo decodificar
+            
+            parsed_listings.append(EpgListingSchema.model_validate(item))
+            
+        return parsed_listings
     
     async def get_movie_categories(self) -> List[CategorySchema]:
     

@@ -906,12 +906,12 @@ Resultado:
 ## 📌 Estado Actual
 
 ```text
-Estado: 🟢 Release v1.2.0 en producción
+Estado: 🟢 Release v1.1.0 en producción
 Backend: FastAPI + PostgreSQL (Render)
 Autenticación: JWT + OAuth2 dual (Swagger + Frontend)
 Arquitectura: Multi-tenant IPTV (Xtream por usuario)
 
-Avances recientes (v1.2.0):
+Avances recientes (v1.1.0):
 - Sistema completo de Favoritos (Modelos, CRUD, DB) con aislamiento por usuario.
 - Proxy de Streaming Seguro (oculta credenciales Xtream al reproductor/frontend).
 - Migración de DB implementada con Alembic.

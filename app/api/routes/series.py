@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.services.xtream_service import XtreamClient
-from app.services.stream_validator import validate_stream
 from app.schemas.content import ContentItemSchema, SeriesDetailSchema
 from app.core.config import setting
 from app.core.security import get_current_user
@@ -91,56 +90,4 @@ async def get_series_by_id(
 
     finally:
         await client.close()
-
-
-
-@router.get("/{series_id}/{episode_id}/play")
-async def get_episode_play_url(
-    series_id: int, 
-    episode_id: int, 
-    current_user: str = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    creds = get_active_xtream_credentials_by_email(db, current_user)
-    if not creds:
-        raise HTTPException(status_code=400, detail="Credenciales Xtream no configuradas")
-
-    client = XtreamClient(
-        creds['host'],
-        creds['username'],
-        creds['password']
-    )
-    try:
-        series_data = await client.get_series_info(series_id)
-        if not series_data:
-            raise HTTPException(status_code=404, detail="Serie no encontrada")
-
-        # Buscar el episodio dentro de la serie
-        episode_found = None
-        for eps_list in series_data.get("episodes", {}).values():
-            for ep in eps_list:
-
-                if ep.get("id") == str(episode_id):
-                    episode_found = ep
-                    break
-            if episode_found:
-                break
-
-        if not episode_found:
-            raise HTTPException(status_code=404, detail="Episodio no encontrado")
-
-        container_ext = episode_found.get("container_extension")
-        if not container_ext:
-            raise HTTPException(status_code=400, detail="No se encontró formato de reproducción")
-
-        play_url = f"{creds['host']}/series/{creds['username']}/{creds['password']}/{episode_id}.{container_ext}"
-        
-        is_valid = await validate_stream("series", episode_id, play_url)
-
-        if not is_valid:
-            raise HTTPException(status_code=404, detail="Stream not available")
-        
-        return {"play_url": play_url}
-
-    finally:
-        await client.close()
+

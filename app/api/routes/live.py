@@ -3,7 +3,6 @@ from typing import List, Optional
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.services.xtream_service import XtreamClient
-from app.services.stream_validator import validate_stream
 from app.schemas.xtream import CategorySchema
 from app.schemas.content import ContentItemSchema
 from app.core.security import get_current_user
@@ -63,28 +62,4 @@ async def get_live_streams(
         raise HTTPException(status_code=500, detail=f"Error obteniendo canales: {str(e)}")
     finally:
         await client.close()
-
-
-@router.get("/{live_id}/play")
-async def get_live_play_url(
-    live_id: int,
-    current_user: str = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    
-    creds = get_active_xtream_credentials_by_email(db, current_user)
-    if not creds:
-        raise HTTPException(status_code=400, detail="Credenciales Xtream no configuradas")
-    
-    play_url = (
-        f"{creds['host']}"
-        f"/live/{creds['username']}/{creds['password']}"
-        f"/{live_id}.ts"
-    )
-
-    is_valid = await validate_stream("live", live_id, play_url)
-
-    if not is_valid:
-        raise HTTPException(status_code=404, detail="Stream not available")
-
-    return {"play_url": play_url}
+

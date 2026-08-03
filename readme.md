@@ -906,30 +906,25 @@ Resultado:
 ## 📌 Estado Actual
 
 ```text
-Estado: 🟡 Release v1.1.0 en preparación para producción
+Estado: 🟢 Release v1.2.0 en producción
 Backend: FastAPI + PostgreSQL (Render)
 Autenticación: JWT + OAuth2 dual (Swagger + Frontend)
 Arquitectura: Multi-tenant IPTV (Xtream por usuario)
 
-Avances recientes:
-
-- Auth estable en dev y prod
-- Swagger funcional en producción
-- Login frontend estable
-- Credenciales Xtream persistentes y cifradas
-- PostgreSQL activo en Render
-- CORS configurado para frontend
+Avances recientes (v1.2.0):
+- Sistema completo de Favoritos (Modelos, CRUD, DB) con aislamiento por usuario.
+- Proxy de Streaming Seguro (oculta credenciales Xtream al reproductor/frontend).
+- Migración de DB implementada con Alembic.
+- Mejora criptográfica: Separación de llaves Fernet y JWT_SECRET.
+- Optimización de rendimiento: Cliente global httpx (AsyncClient).
+- 61/61 tests pasando exitosamente.
 
 Próximos pasos:
-
-- Merge a main (producción)
-- Tag v1.1.0
-- Merge release → develop
-- Preparación frontend consumo real
-- Optimización de cache Xtream
-- Logging estructurado (opcional)
-- Tests de integración en CI
-
+- Integrar sistema de Favoritos en el frontend.
+- Probar reproducción mediante el Proxy Seguro desde el cliente web.
+- Optimización de cache Xtream.
+- Logging estructurado (opcional).
+- Tests de integración en CI.
 ```
 
 ---

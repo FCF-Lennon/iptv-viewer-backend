@@ -2,6 +2,7 @@ import httpx
 import logging
 from typing import Any, Optional, List, Dict
 from app.core.config import setting
+from app.core.http_client import get_http_client
 from app.schemas.xtream import RawLiveSchema, CategorySchema, RawMovieSchema, RawSeriesSchema
 from app.utils.text_cleaner import remove_emojis, normalize_whitespace, clean_category_name
 
@@ -14,12 +15,7 @@ class XtreamClient:
         self.host = host
         self.username = username
         self.password = password
-        self.user_agent = setting.xtream_user_agent
-
-        self.client = httpx.AsyncClient(
-            timeout=10.0,
-            headers={"User-Agent": self.user_agent}
-        )
+        self.client = get_http_client()
 
     async def _get(self, action: str, extra_params: Optional[dict] = None) -> Optional[Any]:
         
@@ -183,7 +179,6 @@ class XtreamClient:
     
     async def get_live_categories(self) -> List[CategorySchema]:
         data = await self._get("get_live_categories")
-        print(f"2. Petición terminada. Datos recibidos: {len(data) if data else 0} items")
         if not data:
             return []
 
@@ -206,8 +201,9 @@ class XtreamClient:
         return categories
 
     async def close(self):
-        """Cerrar sesión del cliente HTTP."""
-        await self.client.aclose()
+        """No hace nada, el cliente HTTP es global y se cierra en el lifespan de la app."""
+        pass
+
 
     
     

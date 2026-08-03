@@ -11,12 +11,18 @@ from app.api.routes.stream import router as stream_router
 from app.api.routes.favorites import router as favorites_router
 from app.db.init_db import init_db
 
+from app.core.http_client import start_http_client, stop_http_client
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # --- STARTUP ---
     init_db()
+    start_http_client()
     
     yield
+    
+    # --- SHUTDOWN ---
+    await stop_http_client()
 
 
 app = FastAPI(
